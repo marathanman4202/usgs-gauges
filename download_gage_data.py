@@ -1,3 +1,8 @@
+"""
+downloads USGS gage data to tab-delimited text files on hard drive
+Definitely ugly and fast, but it worked
+Apologies to future self for bad coding and few comments
+"""
 # Depends on nwispy, downloadable at github
 import sys
 import xlrd

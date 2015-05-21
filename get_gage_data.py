@@ -1,5 +1,5 @@
 import pandas as pd
-import csv
+import numpy as np
 def get_gage_data(gage_number, file_name = '', index_col = 0, local_path = ''):
     """
     returns pandas dataframe with gage data from gage number
@@ -18,7 +18,7 @@ def get_gage_data(gage_number, file_name = '', index_col = 0, local_path = ''):
 #        reader = csv.reader(f, delimiter="\t")
 #        d = list(reader)
 #    print d[0][2] # 248
-    gage_df = pd.read_csv(local_path+file_name,sep ="\t", index_col=index_col, parse_dates=[index_col], comment='#', skiprows=0)
+    gage_df = pd.read_csv(local_path+file_name,index_col=index_col, parse_dates=[index_col], comment='#', skiprows=0) #sep ="\t", 
     gage_df = gage_df.convert_objects(convert_numeric=True)
     gage_df.index  = pd.to_datetime(gage_df.index.date)  #convert to Timestamp, set time to 00
     assert False
@@ -26,4 +26,4 @@ def get_gage_data(gage_number, file_name = '', index_col = 0, local_path = ''):
     
     return gage_df
 
-testpd = get_gage_data(14191000, local_path = 'C:\\code\\Willamette Basin gauge data\\')
+testpd = get_gage_data(1000, local_path = 'C:\\code\\Willamette Basin gauge data\\')
