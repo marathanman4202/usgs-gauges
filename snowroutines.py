@@ -8,6 +8,8 @@ def get_snow_data(index_col = 0, local_path = ''):
     local_path -- path location for data (str) default = ''
     index_col -- column for dates (int) default = 0
     return snow_df -- pandas df (pandas dataframe)
+    
+    requires snotel data saved to csv files at location local_path
     """
     assert type(local_path) == str
     i = -1
@@ -68,8 +70,20 @@ def basin_index(df):
 
     return df_basin_index
 
+def tsplot(df):
+    """
+    simple plotting routine for timeseries.  Just quick & dirty.
+    """
+    import matplotlib
+    import matplotlib.pyplot as plt
+    matplotlib.style.use('ggplot')
+    axes=plt.gca()
+#    axes.set_xlim(['20150101','20150430'])
+    #axes.set_ylim([0,10])
+    df.plot()
+    plt.show()    
 #Test with the following lines
-snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
-snotel_basin_index = basin_index(snow_df)
-print snotel_basin_index
-hold = np.array(snotel_basin_index)
+#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+#snotel_basin_index = basin_index(snow_df)
+#snotelplot= snotel_basin_index.loc['20150101':'20150510']
+#tsplot(snotelplot)
