@@ -1,6 +1,8 @@
 # Roy Haggerty 5/21/2015
 import pandas as pd
 import os
+from datetime import datetime 
+from datetime import timedelta
 def get_snow_data(index_col = 0, local_path = ''):
     """
     returns pandas dataframe with all snow data from snotel sites
@@ -49,26 +51,45 @@ def normalize_by_median(df):
 
 def basin_index(df):
     """
-    returns pandas dataframe with normalized daily basin median
+    returns pandas dataframe with normalized daily basin index
     From snotel website 
         "The basin index is calculated as the sum of the valid 
         current values divided by the sum of the corresponding medians 
         (for snow water equivalent) or averages (for precipitation) and 
         the resulting fraction multiplied by 100."
     df = pandas dataframe with daily time index
-    return df_norm -- pandas df (pandas dataframe)
+    return df_basin_index -- pandas df with normalized basin index (pandas dataframe)
     """
     df_sum = df.sum(axis=1)
-#    df_median = df.groupby(lambda x: x.dayofyear).median()
-#    df_median_sum = df_median.sum(axis=1)
-#    df_median_byday = df_median_sum.transform(pd.Series.median)
-#    print df_median_byday
-#    assert False
     df1 = df.groupby(lambda x: x.dayofyear).transform(pd.Series.median)
     df2 = df1.sum(axis=1)
     df_basin_index = df_sum.div(df2)
 
     return df_basin_index
+    
+def basin_index_doy(df,doy=91,start='19781001',end='20150519'):
+    """
+    returns pandas dataframe with normalized daily basin median for particular day of year
+    doy of year is relative to Jan 1 (doy = 1).  Default = Apr 1.
+    From snotel website 
+        "The basin index is calculated as the sum of the valid 
+        current values divided by the sum of the corresponding medians 
+        (for snow water equivalent) or averages (for precipitation) and 
+        the resulting fraction multiplied by 100."
+    start = first possible day of returned data
+    end = last possible day of returned data
+    df = pandas dataframe with daily time index
+    return df_basin_index_doy -- pandas df (pandas dataframe)
+    """
+    assert type(start) == str
+    assert type(end) == str
+    df_basin_index = basin_index(df)
+    td = timedelta(days=doy)
+    dr = pd.date_range(datetime(int(start[:4]),12,31)+td,
+                       datetime(int(end  [:4]),int(end[4:6]),int(end[6:8])),
+                        freq=pd.DateOffset(months=12, days=0))
+    df_basin_index_doy = df_basin_index[dr]
+    return df_basin_index_doy
 
 def tsplot(df):
     """
