@@ -35,11 +35,12 @@ def get_snow_data(index_col = 0, local_path = ''):
 
 #Test with the following lines
 snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+snow_normby_median = snow_df.div(snow_df.groupby(lambda x: x.dayofyear).transform(pd.Series.median))
 #snotel_df = pd.concat([snow_df.mean(axis=1),snow_df.median(axis=1)],axis=1)
 #snotel_df.columns = ['mean (in)','median (in)']
 #snotel_df.index.names = ['Date']
 snotel_daily_means = snow_df.groupby(lambda x: x.dayofyear).mean()
 snotel_daily_medians = snow_df.groupby(lambda x: x.dayofyear).median()
-snotel_df_norm = snow_df.div(snotel_daily_medians, axis=1)
-print snotel_df_norm
-print snotel_df_norm.describe()
+#snotel_df_norm = snow_df.div(snotel_daily_medians, axis=1)
+print snow_df
+print snow_normby_median
