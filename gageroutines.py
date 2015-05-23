@@ -90,27 +90,19 @@ def get_avg_discharge_by_month(gage_number, file_name = '', index_col = 2, local
     
     return avg_discharge
     
-def get_avg_discharge_by_doy(df,doy=243):
+def get_avg_discharge_by_moy(df,moy=8):
     """
-    returns pandas dataframe with normalized daily discharge for month of year for which the day of the year is its last day
-    doy of year is relative to Jan 1 (doy = 1).  Default = Apr 1.
-    start = first possible day of returned data
-    end = last possible day of returned data
+    returns pandas dataframe with normalized daily discharge for month of year
     df = pandas dataframe with daily time index
-    return df_basin_index_doy -- pandas df (pandas dataframe)
+    return df_basin_index_moy -- pandas df (pandas dataframe)
     """
-    td = timedelta(days=doy)
-    dr = pd.date_range(datetime(1909,12,31)+td,datetime(2014,12,31),
-                        freq=pd.DateOffset(months=12, days=0))
-    avg_discharge_by_doy = df[dr]
-    return avg_discharge_by_doy
-
+    avg_discharge_by_moy = df[(df.index.month==moy)]# & (df.index.day==day)]
+    return avg_discharge_by_moy
+    
 
 #gage_info = get_gage_data(14144800, local_path= 'C:\\code\\Willamette Basin gauge data\\')
 #print gage_info.head()
 
 avg_discharge = get_avg_discharge_by_month(14144800, local_path = 'C:\\code\\Willamette Basin gauge data\\')
-print avg_discharge
-#assert False
-avg_discharge_by_month = get_avg_discharge_by_doy(avg_discharge,doy=244)
+avg_discharge_by_month = get_avg_discharge_by_moy(avg_discharge,moy=9)
 print avg_discharge_by_month
