@@ -15,9 +15,10 @@ from nwispy import nwispy_webservice
 #print user_parameters_url
 #assert False
 pathy = 'C:\\code\\WBgages\\'
+#pathy = 'C:\\code\\'
 Q_SWE_PRE_params = xlrd.open_workbook('C:\\code\\maplot\\Q-SWE-PRE_temp.xlsx')
-Gauge_num = Q_SWE_PRE_params.sheet_by_index(2).col_values(0)[1:]
-
+#Gauge_num = Q_SWE_PRE_params.sheet_by_index(2).col_values(0)[1:]
+Gauge_num = [14144800]
 b = []
 for gage in Gauge_num:
     gage = int(gage)
