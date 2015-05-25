@@ -98,11 +98,24 @@ def get_avg_discharge_by_moy(df,moy=8):
     """
     avg_discharge_by_moy = df[(df.index.month==moy)]# & (df.index.day==day)]
     return avg_discharge_by_moy
+
+def reassign_by_yr(df):
+    """
+    returns pandas dataframe with single value from each year and time reassigned to year
+    df = pandas dataframe 
+    return value_for_year -- pandas df (pandas dataframe)
+    """
+    value_for_year = df.resample('A',how='mean')
+    return value_for_year
     
+#gage_info = get_gage_info(local_path = 'C:\\code\\Willamette Basin gauge data\\')
+#print gage_info
 
 #gage_info = get_gage_data(14144800, local_path= 'C:\\code\\Willamette Basin gauge data\\')
 #print gage_info.head()
 
-avg_discharge = get_avg_discharge_by_month(14144800, local_path = 'C:\\code\\Willamette Basin gauge data\\')
-avg_discharge_by_month = get_avg_discharge_by_moy(avg_discharge,moy=9)
-print avg_discharge_by_month
+#avg_discharge = get_avg_discharge_by_month(14144800, local_path = 'C:\\code\\Willamette Basin gauge data\\')
+#avg_discharge_by_month = get_avg_discharge_by_moy(avg_discharge,moy=9)
+#print avg_discharge_by_month
+#value_for_year = reassign_by_yr(avg_discharge_by_month)
+#print value_for_year

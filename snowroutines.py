@@ -16,6 +16,7 @@ def get_snow_data(index_col = 0, local_path = ''):
     assert type(local_path) == str
     i = -1
     snow_df_list = []
+    print 'getting snow data, stored locally'
     for filename in os.listdir(local_path):
         if filename[-4:]=='.csv':
             i += 1
@@ -33,7 +34,6 @@ def get_snow_data(index_col = 0, local_path = ''):
             snow_df_list[i].drop(snow_df_list[i].columns[[1,2,3,4,5]], axis=1, inplace=True) # Note: zero indexed
             snow_df_list[i].columns = [filename[:-4]]
             snow_df_list[i].index.names = ['Date']
-            print filename
     snow_df = pd.concat(snow_df_list,axis=1)
     return snow_df
     
@@ -67,7 +67,7 @@ def basin_index(df):
 
     return df_basin_index
     
-def basin_index_doy(df,doy=91,start='19781001',end='20150519'):
+def basin_index_doy(df,doy=91,start='19801001',end='20150519'):
     """
     returns pandas dataframe with normalized daily basin median for particular day of year
     doy of year is relative to Jan 1 (doy = 1).  Default = Apr 1.
