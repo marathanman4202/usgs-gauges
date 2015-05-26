@@ -33,20 +33,20 @@ def get_gage_data(gage_number, file_name = '', index_col = 2, local_path = ''):
     
     return gage_df
 
-def get_gage_info(file_name = 'gage_locations.csv', index_col = [0,2,3], local_path = ''):
+def get_gage_info(file_name = 'gage_locations.csv', index_col = [0,1,2,3], local_path = ''):
     """
     returns list of list of [gage number, lat, long] from csv file
     file_name = csv file
-    index_col = column for gage number, lat, long from csv file
+    index_col = column for gage number [0], gage name [1], lat [2], long [3] from csv file.  Set index_col list to retrieve each of these.
     local_path = location of file
     
-    return list [gage number, lat, long]
+    return list [gage number, gage_name, lat, long] or subset depending on index_col
     """
-    gage_info_np = np.array(np.genfromtxt(local_path + file_name, delimiter=',',skip_header=0))
-    gage_info_np = np.delete(gage_info_np,1,1)  # delete col #1 
+    gage_info_np = np.array(np.genfromtxt(local_path + file_name, delimiter=',',skip_header=0,dtype=None))
     gage_info = gage_info_np.tolist()
-    gage_info = [[int(gage_info[i][0]),gage_info[i][1],gage_info[i][2]] for i in range(len(gage_info))]  #convert gage num to int
-    
+    numcol = len(index_col)
+    numgages = len(gage_info)
+    gage_info = [[gage_info[i][index_col[j]] for j in range(numcol)] for i in range(numgages)] # return only values in index_col for all gages
     return gage_info
     
 def get_all_gages(file_name = 'gage_locations.csv', index_col = [0,2,3], local_path = ''):
@@ -59,7 +59,7 @@ def get_all_gages(file_name = 'gage_locations.csv', index_col = [0,2,3], local_p
     
     return all_gages_df
     """
-    gage_info = get_gage_info(file_name=file_name, index_col=index_col, local_path=local_path)
+    gage_info = get_gage_info(file_name=file_name, index_col=[0], local_path=local_path)
     num_gages = len(gage_info)
     gage_numbers_list = [gage_info[i][0] for i in range(num_gages)]
     gage_df_list = []
@@ -130,12 +130,12 @@ def reassign_by_yr(df):
     value_for_year = df.resample('A',how='mean')
     return value_for_year
     
-#gage_info = get_gage_info(local_path = 'C:\\code\\Willamette Basin gauge data\\')
-#print gage_info
+#gage_info = get_gage_info(local_path = 'C:\\code\\Willamette Basin gauge data\\',index_col=[0,1])
+#print gage_info[:3]
 
 #gage_info = get_gage_data(14144800, local_path= 'C:\\code\\Willamette Basin gauge data\\')
-gagedata = get_avg_discharge_by_doyrange(14144800,10,12,local_path= 'C:\\code\\Willamette Basin gauge data\\')
-print gagedata.head()
+#gagedata = get_avg_discharge_by_doyrange(14144800,10,12,local_path= 'C:\\code\\Willamette Basin gauge data\\')
+#print gagedata.head()
 
 #avg_discharge = get_avg_discharge_by_month(14144800, local_path = 'C:\\code\\Willamette Basin gauge data\\')
 #avg_discharge_by_month = get_avg_discharge_by_moy(avg_discharge,moy=9)
