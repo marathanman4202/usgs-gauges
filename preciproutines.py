@@ -49,9 +49,20 @@ def normalize_by_median(df):
 
     return df_norm
 
+def normalize_by_mean(df):
+    """
+    returns pandas dataframe with normalized daily data
+    
+    df = pandas dataframe with daily time index
+    return df_norm -- pandas df (pandas dataframe)
+    """
+    df_norm = df.div(df.groupby(lambda x: x.dayofyear).transform(pd.Series.mean))
+    # this line thanks to EdChum on stackoverflow
+
+    return df_norm
 def basin_index(df):
     """
-    returns pandas dataframe with normalized daily basin index
+    returns pandas dataframe with normalized basin index
     From snotel website 
         "The basin index is calculated as the sum of the valid 
         current values divided by the sum of the corresponding medians 
@@ -61,20 +72,26 @@ def basin_index(df):
     return df_basin_index -- pandas df with normalized basin index (pandas dataframe)
     """
     df_sum = df.sum(axis=1)
-    df1 = df.groupby(lambda x: x.dayofyear).transform(pd.Series.median)
+    df1 = df.groupby(lambda x: x.dayofyear).transform(pd.Series.mean)
     df2 = df1.sum(axis=1)
     df_basin_index = df_sum.div(df2)
 
     return df_basin_index
     
-def get_precip_by_moyrange(df, moystart,moyend):
+def get_precip_by_moyrange(df, moystart,moyend,wy_month_start = 10):
     """
     returns pandas dataframe with precip in selected moy range for all years
+    wy_month_start = month that water year starts
     
     return precip in time period for each of all years
     """
-    df2 = df[(df.index.month >= moystart)]
-    df_filtered = df2[(df2.index.month <= moyend)]
+    if moystart < wy_month_start:
+        df2 = df[(df.index.month >= moystart)]
+        df_filtered = df2[(df2.index.month <= moyend)]
+    else:
+        df2 = df[(df.index.month < wy_month_start) | (df.index.month >= moystart)]
+        df_filtered = df2[(df2.index.month <= moyend) | (df2.index.month >= moystart)]
+        
     return df_filtered
     
 def basin_index_doy(df,doy=91,start='18950101',end='20160601'):
@@ -107,7 +124,7 @@ def reassign_by_wyr(df):
     df = pandas dataframe 
     return value_for_wy -- pandas df (pandas dataframe)
     """
-    value_for_wy = df.resample('BA-SEP',how='mean')
+    value_for_wy = df.resample('BA-SEP',how='sum')
     return value_for_wy
     
 def tsplot(df):
@@ -124,12 +141,8 @@ def tsplot(df):
     plt.show()    
 #Test with the following lines
 precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-#print precip_df.head()
-precip_by_moyrange = get_precip_by_moyrange(precip_df,1,5)
-#print precip_by_moyrange
+precip_by_moyrange = get_precip_by_moyrange(precip_df,11,2)
 precip_by_wy = reassign_by_wyr(precip_by_moyrange)
-#print precip_by_wy
 precip_basin_index = basin_index(precip_by_wy)
-print precip_basin_index
-precipplot= precip_basin_index['18950101':'20150510']
-tsplot(precipplot)
+precip_basin_index= precip_basin_index['19950101':'20150510']
+tsplot(precip_basin_index)
