@@ -9,7 +9,7 @@ def get_gage_data(gage_number, file_name = '', index_col = 2, local_path = ''):
     
     gage_number -- USGS gage number (int)
     local_path -- path location for data (str) default = ''
-    file_name -- file name for data (str)
+    file_name -- file name for data (str). Can be left blank if file name is 'gage_number.txt'
     index_col -- column for dates (int) default = 0
     return gage_df -- pandas df (pandas dataframe)
     """
@@ -45,13 +45,13 @@ def get_gage_info(file_name = 'gage_locations.csv', index_col = [0,1,2,3], local
     gage_info_np = np.array(np.genfromtxt(local_path + file_name, delimiter=',',skip_header=0,dtype=None))
     gage_info = gage_info_np.tolist()
     numcol = len(index_col)
-    numgages = len(gage_info)
-    gage_info = [[gage_info[i][index_col[j]] for j in range(numcol)] for i in range(numgages)] # return only values in index_col for all gages
+    num_gages = len(gage_info)
+    gage_info = [[gage_info[i][index_col[j]] for j in range(numcol)] for i in range(num_gages)] # return only values asked for by index_col for all gages
     return gage_info
     
 def get_all_gages(file_name = 'gage_locations.csv', index_col = [0,2,3], local_path = ''):
     """
-    returns pandas dataframe of all gages
+    returns pandas dataframe of all gages. Careful. This could be huge!
     file_name = csv file
     index_col = column for gage number, lat, long from csv file
     local_path = location of files
@@ -83,23 +83,24 @@ def get_avg_discharge_by_month(gage_number, file_name = '', index_col = 2, local
     index_col = discharge data column
     local_path = location of files
     
-    return average discharge in time period for all years
+    return average discharge in time period for each of all years
     """
     gage_data = get_gage_data(gage_number, file_name = '', index_col = 2, local_path = local_path)
     avg_discharge = gage_data.resample('M', how='mean')
     
     return avg_discharge
-def get_avg_discharge_by_doyrange(gage_number, doystart,doyend, file_name = '', index_col = 2, local_path = ''):
+def get_discharge_by_doyrange(gage_number, doystart,doyend, file_name = '', index_col = 2, local_path = ''):
     """
     returns pandas dataframe with discharge in selected doy range for all years
     gage_number = gage number
     index_col = discharge data column
     local_path = location of files
     
-    return average discharge in time period for all years
+    return discharges in time period for each of all years
     """
     gage_data = get_gage_data(gage_number, file_name = '', index_col = 2, local_path = local_path)
     gd = gage_data
+
     year = 2015 # arbitrary, only need year to use with datetime
     datestart = datetime(year, 1, 1) + timedelta(doystart - 1)
     moystart = datestart.month
@@ -107,18 +108,18 @@ def get_avg_discharge_by_doyrange(gage_number, doystart,doyend, file_name = '', 
     dateend = datetime(year, 1, 1) + timedelta(doyend - 1)
     moyend = dateend.month
     domend = dateend.day
-    print moystart,domstart,moyend,domend
-    gage_data_filtered = gd[((gd.index.month >=moystart) & (gd.index.day >= domstart)) \
-                          & ((gd.index.month <=moyend) & (gd.index.day <= domend))]
-    
+    gd2 = gd[((gd.index.month == moystart) & (gd.index.day >= domstart)) | (gd.index.month > moystart)]
+    gage_data_filtered = gd2[((gd2.index.month == moyend) & (gd2.index.day <= domend)) | (gd2.index.month < moyend)]
     return gage_data_filtered
+    
 def get_avg_discharge_by_moy(df,moy=8):
     """
     returns pandas dataframe with normalized daily discharge for month of year
     df = pandas dataframe with daily time index
+    moy = month of year, an integer.  Default = 8.
     return df_basin_index_moy -- pandas df (pandas dataframe)
     """
-    avg_discharge_by_moy = df[(df.index.month==moy)]# & (df.index.day==day)]
+    avg_discharge_by_moy = df[(df.index.month==moy)]
     return avg_discharge_by_moy
 
 def reassign_by_yr(df):
@@ -140,5 +141,8 @@ def reassign_by_yr(df):
 #avg_discharge = get_avg_discharge_by_month(14144800, local_path = 'C:\\code\\Willamette Basin gauge data\\')
 #avg_discharge_by_month = get_avg_discharge_by_moy(avg_discharge,moy=9)
 #print avg_discharge_by_month
-#value_for_year = reassign_by_yr(avg_discharge_by_month)
-#print value_for_year
+discharge_by_doy = get_discharge_by_doyrange(14144800,160,225,local_path='C:\\code\\Willamette Basin gauge data\\')
+#print discharge_by_doy
+#assert False
+value_for_year = reassign_by_yr(discharge_by_doy)
+print value_for_year
