@@ -141,8 +141,8 @@ def reassign_by_yr(df):
 #avg_discharge = get_avg_discharge_by_month(14144800, local_path = 'C:\\code\\Willamette Basin gauge data\\')
 #avg_discharge_by_month = get_avg_discharge_by_moy(avg_discharge,moy=9)
 #print avg_discharge_by_month
-discharge_by_doy = get_discharge_by_doyrange(14144800,160,225,local_path='C:\\code\\Willamette Basin gauge data\\')
+#discharge_by_doy = get_discharge_by_doyrange(14144800,160,225,local_path='C:\\code\\Willamette Basin gauge data\\')
 #print discharge_by_doy
 #assert False
-value_for_year = reassign_by_yr(discharge_by_doy)
-print value_for_year
+#value_for_year = reassign_by_yr(discharge_by_doy)
+#print value_for_year
