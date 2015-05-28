@@ -92,10 +92,10 @@ significance_cutoff = 0.1
 
 regression_stats_sg = []
 r_significant = []
-for j_precip in range(9):
+for i_snow in range(6):
     regression_stats_sg_row = []
     r_significant_row = []
-    for i_snow in range(6):
+    for j_precip in range(9):
         snow_and_precip_df = pd.concat([snow_data[i_snow][1],precip_data[j_precip][1]],axis=1)
         snow_and_precip = np.array(snow_and_precip_df.dropna(axis=0, how='any'))
         # slope, intercept, r_value, p_value, std_err
