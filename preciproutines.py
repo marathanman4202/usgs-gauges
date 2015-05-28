@@ -44,6 +44,7 @@ def normalize_by_median(df):
     df = pandas dataframe with daily time index
     return df_norm -- pandas df (pandas dataframe)
     """
+    df= df['18940101':'20141001'] #remove incomplete data for WY15 from calculation
     df_norm = df.div(df.groupby(lambda x: x.dayofyear).transform(pd.Series.median))
     # this line thanks to EdChum on stackoverflow
 
@@ -56,6 +57,7 @@ def normalize_by_mean(df):
     df = pandas dataframe with daily time index
     return df_norm -- pandas df (pandas dataframe)
     """
+    df= df['18940101':'20141001'] #remove incomplete data for WY15 from calculation
     df_norm = df.div(df.groupby(lambda x: x.dayofyear).transform(pd.Series.mean))
     # this line thanks to EdChum on stackoverflow
 
@@ -140,9 +142,11 @@ def tsplot(df):
     df.plot()
     plt.show()    
 #Test with the following lines
-precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-precip_by_moyrange = get_precip_by_moyrange(precip_df,11,2)
-precip_by_wy = reassign_by_wyr(precip_by_moyrange)
-precip_basin_index = basin_index(precip_by_wy)
-precip_basin_index= precip_basin_index['19950101':'20150510']
-tsplot(precip_basin_index)
+#precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
+#precip_by_moyrange = get_precip_by_moyrange(precip_df,10,9)
+#precip_by_wy = reassign_by_wyr(precip_by_moyrange)
+#print precip_by_wy
+#precip_basin_index = basin_index(precip_by_wy)
+#precip_basin_index= precip_basin_index['19950101':'20150510']
+
+#tsplot(precip_basin_index)
