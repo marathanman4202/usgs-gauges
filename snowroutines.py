@@ -36,48 +36,35 @@ def get_snow_data(index_col = 0, local_path = ''):
             snow_df_list[i].columns = [filename[:-4]]
             snow_df_list[i].index.names = ['Date']
     snow_df = pd.concat(snow_df_list,axis=1)
+
     return snow_df
+def getWaterYear(dt):
+    """ 
+    returns year in terms of water year
+    Thanks to ZJS at
+    http://stackoverflow.com/questions/26341272/using-groupby-on-pandas-dataframe-to-group-by-financial-year
+    """
+    year = []
+    for date in dt:
+        if date.month>9: 
+            year.append(date.year+1)
+        else:
+            year.append(date.year)
+    return year    
     
 def cummulative_snow_data(df):
     """
-    returns pandas dataframe with accummulated SWE
+    returns pandas dataframe with accummulated SWE for water year
     add only positive differences
     
     return cum_df -- pandas df (pandas dataframe)
     """
-    df = df.fillna(method='backfill')
-#    cum_df = df
     diff = df.diff()
     diff= diff.clip(lower=0.)
-    diff = diff.fillna(0.)
-    print diff.ix[:,0]
-    assert False
-    #df1.ix[:,1]
-    lastrow = df.ix[df.index[0],:]
-    for index, row in df.iterrows():
-        dif = lastrow - row
-        lastrow = row
-        print dif.clip(.1)
-#        for value in row:
- #           print row.index
-  #          print value
-        assert False
-    data = np.array(df)
-    m = np.shape(df)[0]
-    n = np.shape(df)[1]
-    data_tmp = np.empty_like(data)
-    for i in range(1,m,1):
-        for j in range(n):
-            dif = data[i,j] - data[i-1,j]
-            if dif > 0.: 
-                data_tmp[i,j] = data[i-1,j] + dif
-            else:
-                data_tmp[i,j] = data[i,j]
-    df2 = df
-    df2
-    print data_tmp
-    print data
-    assert False
+    diff.insert(0, 'Water Year', getWaterYear(diff.index))
+    diff_grouped = diff.groupby(diff['Water Year']).cumsum()
+    value_for_year = diff_grouped.resample('A',how='last')
+    return value_for_year
         
 def normalize_by_median(df):
     """
@@ -148,6 +135,7 @@ def tsplot(df):
 #Test with the following lines
 snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
 cumdat = cummulative_snow_data(snow_df)
+print cumdat
 #snotel_basin_index = basin_index(snow_df)
 #snotelplot= snotel_basin_index.loc['20150101':'20150510']
 #tsplot(snotelplot)
