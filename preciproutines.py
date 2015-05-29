@@ -142,11 +142,22 @@ def tsplot(df):
     df.plot()
     plt.show()    
 #Test with the following lines
-#precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-#precip_by_moyrange = get_precip_by_moyrange(precip_df,10,9)
-#precip_by_wy = reassign_by_wyr(precip_by_moyrange)
+precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
+precip_by_moyrange = get_precip_by_moyrange(precip_df,6,6)
+precip_by_wy = reassign_by_wyr(precip_by_moyrange)
+print precip_by_wy['18950101':'20141001'].mean()/1565.6999
 #print precip_by_wy
 #precip_basin_index = basin_index(precip_by_wy)
 #precip_basin_index= precip_basin_index['19950101':'20150510']
 
-#tsplot(precip_basin_index)
+
+#from snowroutines import get_snow_data
+#from snowroutines import basin_index_doy as sn_basin_index_doy
+#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+#snotel_basin_index = sn_basin_index_doy(snow_df)
+#snotelplot= snotel_basin_index.loc['18950101':'20140101']*472.
+#dfplot = pd.concat([precip_by_wy['18950101':'20141001'],reassign_by_wyr(snotelplot)],axis=1)
+#dfplot.columns = ['Precip Feb 1 - Apr 30', 'SNOTEL Basin Index * 472']
+#print dfplot
+
+#tsplot(dfplot)

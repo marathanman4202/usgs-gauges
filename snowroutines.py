@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from datetime import datetime 
 from datetime import timedelta
+import numpy as np
 def get_snow_data(index_col = 0, local_path = ''):
     """
     returns pandas dataframe with all snow data from snotel sites
@@ -37,6 +38,47 @@ def get_snow_data(index_col = 0, local_path = ''):
     snow_df = pd.concat(snow_df_list,axis=1)
     return snow_df
     
+def cummulative_snow_data(df):
+    """
+    returns pandas dataframe with accummulated SWE
+    add only positive differences
+    
+    return cum_df -- pandas df (pandas dataframe)
+    """
+    df = df.fillna(method='backfill')
+#    cum_df = df
+    diff = df.diff()
+    diff= diff.clip(lower=0.)
+    diff = diff.fillna(0.)
+    print diff.ix[:,0]
+    assert False
+    #df1.ix[:,1]
+    lastrow = df.ix[df.index[0],:]
+    for index, row in df.iterrows():
+        dif = lastrow - row
+        lastrow = row
+        print dif.clip(.1)
+#        for value in row:
+ #           print row.index
+  #          print value
+        assert False
+    data = np.array(df)
+    m = np.shape(df)[0]
+    n = np.shape(df)[1]
+    data_tmp = np.empty_like(data)
+    for i in range(1,m,1):
+        for j in range(n):
+            dif = data[i,j] - data[i-1,j]
+            if dif > 0.: 
+                data_tmp[i,j] = data[i-1,j] + dif
+            else:
+                data_tmp[i,j] = data[i,j]
+    df2 = df
+    df2
+    print data_tmp
+    print data
+    assert False
+        
 def normalize_by_median(df):
     """
     returns pandas dataframe with normalized daily data
@@ -104,7 +146,8 @@ def tsplot(df):
     df.plot()
     plt.show()    
 #Test with the following lines
-#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+cumdat = cummulative_snow_data(snow_df)
 #snotel_basin_index = basin_index(snow_df)
 #snotelplot= snotel_basin_index.loc['20150101':'20150510']
 #tsplot(snotelplot)
