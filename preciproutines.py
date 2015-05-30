@@ -80,7 +80,7 @@ def basin_index(df):
 
     return df_basin_index
     
-def get_precip_by_moyrange(df, moystart,moyend,wy_month_start = 10):
+def get_value_by_moyrange(df, moystart,moyend,wy_month_start = 10):
     """
     returns pandas dataframe with precip in selected moy range for all years
     wy_month_start = month that water year starts
@@ -98,7 +98,6 @@ def get_precip_by_moyrange(df, moystart,moyend,wy_month_start = 10):
         df2 = df[(df.index.month >= moystart)]
         df_filtered = df2[(df2.index.month <= moyend)]       
     else:
-        print 'here'
         df2 = df[(df.index.month < wy_month_start) | (df.index.month >= moystart)]
         df_filtered = df2[(df2.index.month <= moyend) | (df2.index.month >= moystart)]
         
@@ -128,13 +127,13 @@ def basin_index_doy(df,doy=91,start='18950101',end='20160601'):
     df_basin_index_doy = df_basin_index[dr]
     return df_basin_index_doy
     
-def reassign_by_wyr(df):
+def reassign_by_wyr(df,how='sum'):
     """
     returns pandas dataframe with single value from each water year (Oct 1 - Sep 30) and time reassigned to year
     df = pandas dataframe 
     return value_for_wy -- pandas df (pandas dataframe)
     """
-    value_for_wy = df.resample('BA-SEP',how='sum')
+    value_for_wy = df.resample('BA-SEP',how=how)
     return value_for_wy
     
 def tsplot(df):
@@ -151,7 +150,7 @@ def tsplot(df):
     plt.show()    
 #Test with the following lines
 #precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-#precip_by_moyrange = get_precip_by_moyrange(precip_df,7,8)
+#precip_by_moyrange = get_value_by_moyrange(precip_df,7,8)
 #precip_by_wy = reassign_by_wyr(precip_by_moyrange)
 #print precip_by_wy['18950101':'20141001'].mean()/1565.6999
 #print precip_by_wy

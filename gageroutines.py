@@ -3,6 +3,14 @@ import pandas as pd
 import numpy as np
 from datetime import datetime 
 from datetime import timedelta
+import imp
+gnrl = imp.load_source('getWaterYear','C:\\code\usgs-gauges\\snowroutines.py')
+gnrl = imp.load_source('get_value_by_moyrange','C:\\code\usgs-gauges\\preciproutines.py')
+gnrl = imp.load_source('reassign_by_wyr','C:\\code\usgs-gauges\\preciproutines.py')
+import sys
+sys.path.insert(0, 'C:\\code\\maplot\\')
+import constants as cst
+
 def get_gage_data(gage_number, file_name = '', index_col = 2, local_path = ''):
     """
     returns pandas dataframe with gage data from gage number
@@ -30,7 +38,6 @@ def get_gage_data(gage_number, file_name = '', index_col = 2, local_path = ''):
     del gage_df[0]
     gage_df.columns = ['Gage number','Discharge (cfs)','Data-value qualification code']
     gage_df.index.names = ['Date']
-    
     return gage_df
 
 def get_gage_info(file_name = 'gage_locations.csv', index_col = [0,1,2,3], local_path = ''):
@@ -134,7 +141,11 @@ def reassign_by_yr(df):
 #gage_info = get_gage_info(local_path = 'C:\\code\\Willamette Basin gauge data\\',index_col=[0,1])
 #print gage_info[:3]
 
-#gage_info = get_gage_data(14144800, local_path= 'C:\\code\\Willamette Basin gauge data\\')
+gage_data = get_gage_data(14211720, local_path= 'C:\\code\\Willamette Basin gauge data\\')
+gage_by_wy = gnrl.reassign_by_wyr(gage_data,how='mean')
+print gage_by_wy.loc['18950101':'20141001'].mean()['Discharge (cfs)']*cst.cfs_to_m3*cst.m3s_to_cmy
+
+
 #gagedata = get_avg_discharge_by_doyrange(14144800,10,12,local_path= 'C:\\code\\Willamette Basin gauge data\\')
 #print gagedata.head()
 

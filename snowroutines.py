@@ -134,17 +134,17 @@ def tsplot(df):
     plt.show()    
 #Test with the following lines
 
-snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
-cumdat = cummulative_positive_wy_snow_data(snow_df)
-snow_basin_index_doy = basin_index_doy(cumdat,doy=91)
-import imp
-gg = imp.load_source('reassign_by_yr','C:\\code\usgs-gauges\\gageroutines.py')
-snow_basin_index_cum91 = gg.reassign_by_yr(snow_basin_index_doy)
-cumdat = cummulative_positive_wy_snow_data(snow_df)
-snow_basin_index_doy = basin_index_doy(cumdat,doy=150)
-gg = imp.load_source('reassign_by_yr','C:\\code\usgs-gauges\\gageroutines.py')
-snow_basin_index_cum150 = gg.reassign_by_yr(snow_basin_index_doy)
-tmp = pd.concat([snow_basin_index_cum91,snow_basin_index_cum150],axis=1)
+#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+#cumdat = cummulative_positive_wy_snow_data(snow_df)
+#snow_basin_index_doy = basin_index_doy(cumdat,doy=91)
+#import imp
+#gg = imp.load_source('reassign_by_yr','C:\\code\usgs-gauges\\gageroutines.py')
+#snow_basin_index_cum91 = gg.reassign_by_yr(snow_basin_index_doy)
+#cumdat = cummulative_positive_wy_snow_data(snow_df)
+#snow_basin_index_doy = basin_index_doy(cumdat,doy=150)
+#gg = imp.load_source('reassign_by_yr','C:\\code\usgs-gauges\\gageroutines.py')
+#snow_basin_index_cum150 = gg.reassign_by_yr(snow_basin_index_doy)
+#tmp = pd.concat([snow_basin_index_cum91,snow_basin_index_cum150],axis=1)
 #snow_basin_index_doy = basin_index_doy(snow_df,doy=91)
 #snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
 #dfplot = pd.concat([snow_basin_index,snow_basin_index_cum],axis = 1)
@@ -154,10 +154,10 @@ tmp = pd.concat([snow_basin_index_cum91,snow_basin_index_cum150],axis=1)
 #tsplot(snotelplot)
 
 #dfplot.columns = ['SWE', 'CUM SWE']
-from pandas import ExcelWriter
-writer = ExcelWriter('CumSWE DOY 91 v 150.xlsx')
-dfplot.to_excel(writer,'Sheet1')
-writer.save()
+#from pandas import ExcelWriter
+#writer = ExcelWriter('CumSWE DOY 91 v 150.xlsx')
+#dfplot.to_excel(writer,'Sheet1')
+#writer.save()
 #tsplot(dfplot)
 
 
