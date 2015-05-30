@@ -40,7 +40,7 @@ def get_snow_data(index_col = 0, local_path = ''):
     return snow_df
 def getWaterYear(dt):
     """ 
-    returns year in terms of water year
+    returns year in terms of water year.  Assumes water year ends Sep 30 (month 9)
     Thanks to ZJS at
     http://stackoverflow.com/questions/26341272/using-groupby-on-pandas-dataframe-to-group-by-financial-year
     """
@@ -52,10 +52,10 @@ def getWaterYear(dt):
             year.append(date.year)
     return year    
     
-def cummulative_snow_data(df):
+def cummulative_positive_wy_snow_data(df):
     """
     returns pandas dataframe with accummulated SWE for water year
-    add only positive differences
+    add only *positive* differences
     
     return cum_df -- pandas df (pandas dataframe)
     """
@@ -63,8 +63,8 @@ def cummulative_snow_data(df):
     diff= diff.clip(lower=0.)
     diff.insert(0, 'Water Year', getWaterYear(diff.index))
     diff_grouped = diff.groupby(diff['Water Year']).cumsum()
-    value_for_year = diff_grouped.resample('A',how='last')
-    return value_for_year
+#    value_for_year = diff_grouped.resample('BA-SEP',how='last')  #Assumes water year ends Sep 30
+    return diff_grouped
         
 def normalize_by_median(df):
     """
@@ -133,9 +133,54 @@ def tsplot(df):
     df.plot()
     plt.show()    
 #Test with the following lines
+
 snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
-cumdat = cummulative_snow_data(snow_df)
-print cumdat
+cumdat = cummulative_positive_wy_snow_data(snow_df)
+snow_basin_index_doy = basin_index_doy(cumdat,doy=91)
+import imp
+gg = imp.load_source('reassign_by_yr','C:\\code\usgs-gauges\\gageroutines.py')
+snow_basin_index_cum91 = gg.reassign_by_yr(snow_basin_index_doy)
+cumdat = cummulative_positive_wy_snow_data(snow_df)
+snow_basin_index_doy = basin_index_doy(cumdat,doy=150)
+gg = imp.load_source('reassign_by_yr','C:\\code\usgs-gauges\\gageroutines.py')
+snow_basin_index_cum150 = gg.reassign_by_yr(snow_basin_index_doy)
+tmp = pd.concat([snow_basin_index_cum91,snow_basin_index_cum150],axis=1)
+#snow_basin_index_doy = basin_index_doy(snow_df,doy=91)
+#snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
+#dfplot = pd.concat([snow_basin_index,snow_basin_index_cum],axis = 1)
+#print cumdat
 #snotel_basin_index = basin_index(snow_df)
 #snotelplot= snotel_basin_index.loc['20150101':'20150510']
 #tsplot(snotelplot)
+
+#dfplot.columns = ['SWE', 'CUM SWE']
+from pandas import ExcelWriter
+writer = ExcelWriter('CumSWE DOY 91 v 150.xlsx')
+dfplot.to_excel(writer,'Sheet1')
+writer.save()
+#tsplot(dfplot)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

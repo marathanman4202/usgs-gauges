@@ -87,10 +87,18 @@ def get_precip_by_moyrange(df, moystart,moyend,wy_month_start = 10):
     
     return precip in time period for each of all years
     """
+    if moystart > moyend and moystart < wy_month_start:
+        print 'moystart must be before moyend'; assert False
+    elif moystart > 12 or moyend > 12:
+        print 'months must be less than or equal to 12'; assert False
     if moystart < wy_month_start:
         df2 = df[(df.index.month >= moystart)]
         df_filtered = df2[(df2.index.month <= moyend)]
+    elif moystart >= wy_month_start and moyend >= moystart:
+        df2 = df[(df.index.month >= moystart)]
+        df_filtered = df2[(df2.index.month <= moyend)]       
     else:
+        print 'here'
         df2 = df[(df.index.month < wy_month_start) | (df.index.month >= moystart)]
         df_filtered = df2[(df2.index.month <= moyend) | (df2.index.month >= moystart)]
         
@@ -142,10 +150,10 @@ def tsplot(df):
     df.plot()
     plt.show()    
 #Test with the following lines
-precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-precip_by_moyrange = get_precip_by_moyrange(precip_df,6,6)
-precip_by_wy = reassign_by_wyr(precip_by_moyrange)
-print precip_by_wy['18950101':'20141001'].mean()/1565.6999
+#precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
+#precip_by_moyrange = get_precip_by_moyrange(precip_df,7,8)
+#precip_by_wy = reassign_by_wyr(precip_by_moyrange)
+#print precip_by_wy['18950101':'20141001'].mean()/1565.6999
 #print precip_by_wy
 #precip_basin_index = basin_index(precip_by_wy)
 #precip_basin_index= precip_basin_index['19950101':'20150510']

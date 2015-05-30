@@ -9,6 +9,7 @@ from datetime import datetime
 from datetime import timedelta
 snt = imp.load_source('get_snow_data','C:\\code\\usgs-gauges\\snowroutines.py')
 snt = imp.load_source('basin_index_doy','C:\\code\\usgs-gauges\\snowroutines.py')
+snt = imp.load_source('cummulative_positive_wy_snow_data','C:\\code\\usgs-gauges\\snowroutines.py')
 gg = imp.load_source('get_avg_discharge_by_moy','C:\\code\\usgs-gauges\\gageroutines.py')    
 gg = imp.load_source('get_avg_discharge_by_month','C:\\code\\usgs-gauges\\gageroutines.py')    
 gg = imp.load_source('get_gage_info','C:\\code\\usgs-gauges\\gageroutines.py')
@@ -21,6 +22,8 @@ pp = imp.load_source('basin_index','C:\\code\\usgs-gauges\\preciproutines.py')
 
 snow_data = []
 snow_df = snt.get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+snow_df = snow_df.loc['19801001':'20140930']
+snow_df = snt.cummulative_positive_wy_snow_data(snow_df)  # FOR CUMMULATIVE SWE.  COMMENT OUT FOR NON-CUMMULATIVE
 snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=1)
 snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
 snow_data.append(['Jan 1 SWE',snow_basin_index])
@@ -33,12 +36,14 @@ snow_data.append(['Mar 1 SWE',snow_basin_index])
 snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=91)
 snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
 snow_data.append(['Apr 1 SWE',snow_basin_index])
+snow_sv = snow_basin_index  ####
 snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=121)
 snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
 snow_data.append(['May 1 SWE',snow_basin_index])
 snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=152)
 snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
 snow_data.append(['Jun 1 SWE',snow_basin_index])
+
 
 precip_data = []
 precip_df = pp.get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
@@ -52,6 +57,7 @@ precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
 precip_basin_index = pp.basin_index(precip_by_wy)
 precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
 precip_data.append(['Feb-May Precip',precip_basin_index])
+precip_sv = precip_basin_index  ####
 precip_by_moyrange = pp.get_precip_by_moyrange(precip_df,3,5)
 precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
 precip_basin_index = pp.basin_index(precip_by_wy)
@@ -88,6 +94,13 @@ precip_basin_index = pp.basin_index(precip_by_wy)
 precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
 precip_data.append(['Mar Precip',precip_basin_index])
 
+snow_precip_pair = pd.concat([snow_sv,precip_sv],axis=1)
+snow_precip_pair.columns = ['SWE', 'CUM SWE']
+from pandas import ExcelWriter
+writer = ExcelWriter('Apr1 SWE v spring Precip.xlsx')
+snow_precip_pair.to_excel(writer,'Apr1 SWE spr Pre')
+writer.save()
+
 significance_cutoff = 0.1
 
 regression_stats_sg = []
@@ -108,6 +121,7 @@ for i_snow in range(6):
     regression_stats_sg.append(regression_stats_sg_row)
     r_significant.append(r_significant_row)
 
+np.savetxt('correlation.csv',np.transpose(r_significant),delimiter=',')
 print r_significant
 
 
