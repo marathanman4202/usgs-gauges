@@ -137,6 +137,25 @@ def reassign_by_yr(df):
     """
     value_for_year = df.resample('A',how='mean')
     return value_for_year
+
+def plot_fourier(df,name):
+    """
+    plot fourier transform of pandas dataframe
+    Thanks to Paul H at http://stackoverflow.com/questions/25735153/plotting-a-fast-fourier-transform-in-python 
+    """
+    import matplotlib.pyplot as plt
+    import scipy.fftpack
+    
+    # Number of samplepoints
+
+    y = np.array(df[name])
+    N = len(y)
+    T = 1./365.
+#    x = np.linspace(0.0, N*T, N)
+    yf = scipy.fftpack.fft(y)
+    xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
+    fig, ax = plt.subplots()
+    ax.plot(xf, 2.0/N * np.abs(yf[0:N/2]))
     
 #gage_info = get_gage_info(local_path = 'C:\\code\\Willamette Basin gauge data\\',index_col=[0,1])
 #print gage_info[:3]
@@ -145,6 +164,9 @@ gage_data = get_gage_data(14211720, local_path= 'C:\\code\\Willamette Basin gaug
 gage_by_wy = gnrl.reassign_by_wyr(gage_data,how='mean')
 print gage_by_wy.loc['18950101':'20141001'].mean()['Discharge (cfs)']*cst.cfs_to_m3*cst.m3s_to_cmy
 
+#print gage_data.iloc[:,1:2]
+#print gage_data["Discharge (cfs)"]
+plot_fourier(gage_data,name="Discharge (cfs)")
 
 #gagedata = get_avg_discharge_by_doyrange(14144800,10,12,local_path= 'C:\\code\\Willamette Basin gauge data\\')
 #print gagedata.head()

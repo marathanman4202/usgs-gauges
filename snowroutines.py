@@ -4,6 +4,9 @@ import os
 from datetime import datetime 
 from datetime import timedelta
 import numpy as np
+import imp
+#gnrl = imp.load_source('plot_fourier','C:\\code\usgs-gauges\\gageroutines.py')
+
 def get_snow_data(index_col = 0, local_path = ''):
     """
     returns pandas dataframe with all snow data from snotel sites
@@ -119,6 +122,25 @@ def basin_index_doy(df,doy=91,start='19801001',end='20150519'):
                         freq=pd.DateOffset(months=12, days=0))
     df_basin_index_doy = df_basin_index[dr]
     return df_basin_index_doy
+    
+def plot_fourier(df,name):
+    """
+    plot fourier transform of pandas dataframe
+    Thanks to Paul H at http://stackoverflow.com/questions/25735153/plotting-a-fast-fourier-transform-in-python 
+    """
+    import matplotlib.pyplot as plt
+    import scipy.fftpack
+    
+    # Number of samplepoints
+
+    y = np.array(df[name])
+    N = len(y)
+    T = 1./365.
+#    x = np.linspace(0.0, N*T, N)
+    yf = scipy.fftpack.fft(y)
+    xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
+    fig, ax = plt.subplots()
+    ax.plot(xf, 2.0/N * np.abs(yf[0:N/2]))
 
 def tsplot(df):
     """
@@ -134,7 +156,10 @@ def tsplot(df):
     plt.show()    
 #Test with the following lines
 
-#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+#print snow_df.head()
+
+plot_fourier(snow_df,"Santiam Jct. (733)")
 #cumdat = cummulative_positive_wy_snow_data(snow_df)
 #snow_basin_index_doy = basin_index_doy(cumdat,doy=91)
 #import imp
