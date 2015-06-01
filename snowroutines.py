@@ -5,9 +5,12 @@ from datetime import datetime
 from datetime import timedelta
 import numpy as np
 import imp
+import sys
+sys.path.insert(0, 'C:\\code\\maplot\\')
+import constants as cst
 #gnrl = imp.load_source('plot_fourier','C:\\code\usgs-gauges\\gageroutines.py')
 
-def get_snow_data(index_col = 0, local_path = ''):
+def get_snow_data(index_col = 0, local_path = '',retrieve='SWE'):
     """
     returns pandas dataframe with all snow data from snotel sites
     
@@ -35,8 +38,19 @@ def get_snow_data(index_col = 0, local_path = ''):
                 parse_dates=[index_col], skiprows=skiprows,header=None))
             snow_df_list[i] = snow_df_list[i].convert_objects(convert_numeric=True)
             snow_df_list[i].index  = pd.to_datetime(snow_df_list[i].index.date)  #convert to Timestamp, set time to 00
-            snow_df_list[i].drop(snow_df_list[i].columns[[1,2,3,4,5]], axis=1, inplace=True) # Note: zero indexed
-            snow_df_list[i].columns = [filename[:-4]]
+            if retrieve == 'SWE':
+                snow_df_list[i].drop(snow_df_list[i].columns[[1,2,3,4,5]], axis=1, inplace=True) # Note: zero indexed
+                snow_df_list[i].columns = [filename[:-4]]
+            elif retrieve == 'Precip':
+                snow_df_list[i].drop(snow_df_list[i].columns[[0,1,2,3,4]], axis=1, inplace=True) # Note: zero indexed
+                snow_df_list[i].columns = [filename[:-4]]
+            elif retrieve == 'SWEflux':
+                # returns column of Precip plus addition (melt) from SWE or minus subtraction (storage) to SWE
+                snow_tmp_df = snow_df_list[i][6] \
+                            - snow_df_list[i][1].diff()
+                snow_df_list[i][1] = snow_tmp_df
+                snow_df_list[i].drop(snow_df_list[i].columns[[1,2,3,4,5]], axis=1, inplace=True) # Note: zero indexed
+                snow_df_list[i].columns = [filename[:-4]]                
             snow_df_list[i].index.names = ['Date']
     snow_df = pd.concat(snow_df_list,axis=1)
 
@@ -55,17 +69,20 @@ def getWaterYear(dt):
             year.append(date.year)
     return year    
     
-def cummulative_positive_wy_snow_data(df):
+def cummulative_positive_wy_snow_data(df,periods=1):
     """
     returns pandas dataframe with accummulated SWE for water year
     add only *positive* differences
     
     return cum_df -- pandas df (pandas dataframe)
     """
-    diff = df.diff()
+    if periods == 7:
+        df = df.resample('W',how='last')
+    diff = df.diff()  
     diff= diff.clip(lower=0.)
     diff.insert(0, 'Water Year', getWaterYear(diff.index))
     diff_grouped = diff.groupby(diff['Water Year']).cumsum()
+
 #    value_for_year = diff_grouped.resample('BA-SEP',how='last')  #Assumes water year ends Sep 30
     return diff_grouped
         
@@ -123,26 +140,37 @@ def basin_index_doy(df,doy=91,start='19801001',end='20150519'):
     df_basin_index_doy = df_basin_index[dr]
     return df_basin_index_doy
     
-def plot_fourier(df,name):
+def plot_fourier(df,name,filterf=None):
     """
     plot fourier transform of pandas dataframe
     Thanks to Paul H at http://stackoverflow.com/questions/25735153/plotting-a-fast-fourier-transform-in-python 
     """
     import matplotlib.pyplot as plt
     import scipy.fftpack
-    
-    # Number of samplepoints
-
+    from scipy.ndimage import gaussian_filter1d    
+    # Nans must be removed or routine generates an error
+    df = df.fillna(0.)
+    df = df/df.mean()
     y = np.array(df[name])
     N = len(y)
     T = 1./365.
-#    x = np.linspace(0.0, N*T, N)
     yf = scipy.fftpack.fft(y)
+    yf = 2.0/N * np.abs(yf[0:N/2])
+    if filterf != None:
+        yf = gaussian_filter1d(yf,filterf)
     xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
     fig, ax = plt.subplots()
-    ax.plot(xf, 2.0/N * np.abs(yf[0:N/2]))
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+#    ax.set_xlim(xmin=0.1)
+#    ax.set_xlim(xmax=1)
+    ax.set_ylim(ymax=100.)
+    ax.set_ylim(ymin = 1.e-5)
+    ax.set_title(name)
+    ax.plot(xf, yf)
+    return xf,yf
 
-def tsplot(df):
+def tsplot(df,name):
     """
     simple plotting routine for timeseries.  Just quick & dirty.
     """
@@ -150,17 +178,32 @@ def tsplot(df):
     import matplotlib.pyplot as plt
     matplotlib.style.use('ggplot')
     axes=plt.gca()
-#    axes.set_xlim(['20150101','20150430'])
+    axes.set_title(name)
+#    axes.set_xlim(['19801001','20150430'])
     #axes.set_ylim([0,10])
-    df.plot()
+    df[name].plot()
     plt.show()    
 #Test with the following lines
+#Names: 
+#name = "Railroad Overpass (710)"
+#name = "Santiam Jct. (733)"
+#name = "Mckenzie (619)"
+#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\',retrieve="SWEflux")
+#snow_df = snow_df.loc['19801001':'20140930']#xf,yf1 = plot_fourier(snow_df['19811001':],name,filterf=10.)
+#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\',retrieve="Precip")
+#xf,yf2 = plot_fourier(snow_df['19811001':],name,filterf=10.)
+##rtd_df = pd.DataFrame(yf1/yf2)
+##rtd_df.columns = [name]
+##plot_fourier(rtd_df,name)
+#
+#import matplotlib.pyplot as plt
+#fig, ax = plt.subplots()
+##ax.set_xscale('log')
+##    ax.set_xlim(xmin=0.1)
+#ax.set_xlim(xmax=1.)
+#ax.set_title(name)
+#ax.plot(1./xf, yfdiff)
 
-snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
-#print snow_df.head()
-
-plot_fourier(snow_df,"Santiam Jct. (733)")
-#cumdat = cummulative_positive_wy_snow_data(snow_df)
 #snow_basin_index_doy = basin_index_doy(cumdat,doy=91)
 #import imp
 #gg = imp.load_source('reassign_by_yr','C:\\code\usgs-gauges\\gageroutines.py')

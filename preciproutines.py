@@ -3,15 +3,19 @@ import pandas as pd
 import os
 from datetime import datetime 
 from datetime import timedelta
+import sys
+sys.path.insert(0, 'C:\\code\\maplot\\')
+import constants as cst
+
 def get_precip_data(index_col = 0, local_path = ''):
     """
-    returns pandas dataframe with all snow data from snotel sites
+    returns pandas dataframe with all precip data from csv file
     
     local_path -- path location for data (str) default = ''
     index_col -- column for dates (int) default = 0
-    return snow_df -- pandas df (pandas dataframe)
+    return precip_df -- pandas df (pandas dataframe)
     
-    requires snotel data saved to csv files at location local_path
+    requires precip data saved to csv files at location local_path
     """
     assert type(local_path) == str
     i = -1
@@ -136,6 +140,27 @@ def reassign_by_wyr(df,how='sum'):
     value_for_wy = df.resample('BA-SEP',how=how)
     return value_for_wy
     
+def plot_fourier(df,name):
+    """
+    plot fourier transform of pandas dataframe
+    Thanks to Paul H at http://stackoverflow.com/questions/25735153/plotting-a-fast-fourier-transform-in-python 
+    """
+    import matplotlib.pyplot as plt
+    import scipy.fftpack
+    
+    # Number of samplepoints
+
+    y = np.array(df[name])
+    N = len(y)
+    T = 1./12.
+    yf = scipy.fftpack.fft(y)
+    yf = 2.0/N * np.abs(yf[0:N/2])
+    xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
+    fig, ax = plt.subplots()
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.plot(xf, yf)
+    
 def tsplot(df):
     """
     simple plotting routine for timeseries.  Just quick & dirty.
@@ -150,9 +175,10 @@ def tsplot(df):
     plt.show()    
 #Test with the following lines
 #precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-#precip_by_moyrange = get_value_by_moyrange(precip_df,7,8)
-#precip_by_wy = reassign_by_wyr(precip_by_moyrange)
-#print precip_by_wy['18950101':'20141001'].mean()/1565.6999
+##precip_by_moyrange = get_value_by_moyrange(precip_df,7,8)
+#precip_by_wy = reassign_by_wyr(precip_df)
+#tsplot(precip_by_wy)
+#print precip_by_wy['19000101':'20141001'].mean()#/1565.6999
 #print precip_by_wy
 #precip_basin_index = basin_index(precip_by_wy)
 #precip_basin_index= precip_basin_index['19950101':'20150510']

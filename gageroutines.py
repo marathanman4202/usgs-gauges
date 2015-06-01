@@ -147,26 +147,35 @@ def plot_fourier(df,name):
     import scipy.fftpack
     
     # Number of samplepoints
+    df = df/df.mean()
 
     y = np.array(df[name])
     N = len(y)
     T = 1./365.
 #    x = np.linspace(0.0, N*T, N)
     yf = scipy.fftpack.fft(y)
+    yf = 2.0/N * np.abs(yf[0:N/2])
     xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
     fig, ax = plt.subplots()
-    ax.plot(xf, 2.0/N * np.abs(yf[0:N/2]))
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.plot(xf, yf)
     
 #gage_info = get_gage_info(local_path = 'C:\\code\\Willamette Basin gauge data\\',index_col=[0,1])
 #print gage_info[:3]
-
-gage_data = get_gage_data(14211720, local_path= 'C:\\code\\Willamette Basin gauge data\\')
-gage_by_wy = gnrl.reassign_by_wyr(gage_data,how='mean')
-print gage_by_wy.loc['18950101':'20141001'].mean()['Discharge (cfs)']*cst.cfs_to_m3*cst.m3s_to_cmy
-
-#print gage_data.iloc[:,1:2]
-#print gage_data["Discharge (cfs)"]
-plot_fourier(gage_data,name="Discharge (cfs)")
+# Names:
+    # Clear Lake 14158500
+    # Portland 14211720
+    # Calapooia 14173500
+    # Marys 14171000
+#gage_data = get_gage_data(14211720, local_path= 'C:\\code\\Willamette Basin gauge data\\')
+#gage_by_wy = gnrl.reassign_by_wyr(gage_data,how='mean')
+#SpQ = gage_by_wy.loc['18950101':'20141001'].mean()['Discharge (cfs)']*cst.cfs_to_m3*cst.WBm3s_to_cmy
+#SpQ = SpQ*cst.Willamette_Basin_area/cst.Willamette_Basin_area_at_PDX
+#print SpQ
+##print gage_data.iloc[:,1:2]
+##print gage_data["Discharge (cfs)"]
+#plot_fourier(gage_data,name="Discharge (cfs)")
 
 #gagedata = get_avg_discharge_by_doyrange(14144800,10,12,local_path= 'C:\\code\\Willamette Basin gauge data\\')
 #print gagedata.head()
