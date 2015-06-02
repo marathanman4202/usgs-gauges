@@ -8,8 +8,9 @@ import imp
 import sys
 sys.path.insert(0, 'C:\\code\\maplot\\')
 import constants as cst
+from scipy.ndimage import gaussian_filter1d    
 #gnrl = imp.load_source('plot_fourier','C:\\code\usgs-gauges\\gageroutines.py')
-
+gnrl = imp.load_source('reassign_by_wyr','C:\\code\usgs-gauges\\preciproutines.py')
 def get_snow_data(index_col = 0, local_path = '',retrieve='SWE'):
     """
     returns pandas dataframe with all snow data from snotel sites
@@ -69,22 +70,43 @@ def getWaterYear(dt):
             year.append(date.year)
     return year    
     
-def cummulative_positive_wy_snow_data(df,periods=1):
+def cummulative_positive_wy_snow_data(df,periods='D'):
     """
     returns pandas dataframe with accummulated SWE for water year
     add only *positive* differences
     
     return cum_df -- pandas df (pandas dataframe)
     """
-    if periods == 7:
-        df = df.resample('W',how='last')
-    diff = df.diff()  
-    diff= diff.clip(lower=0.)
+    ncols = df.shape[1]
+    if periods == 'W':
+        weekly_df = df.resample('W',how='last')  # weekly values
+        diff_weekly = weekly_df.diff()  # dif of weekly values
+        diff_weekly = diff_weekly.clip(lower=0.)
+        df[:] = np.NaN
+        diff = pd.merge(df,diff_weekly,left_index=True,right_index=True,how='left',copy=False)  #replace df with weekly_df
+        diff = diff.fillna(method='ffill') # fill between weekly values with value from last date
+        cols = diff.columns
+        diff = diff.drop([cols[i] for i in range(0,ncols)],axis=1)
+    else:
+        diff = df.diff()  
+        diff= diff.clip(lower=0.)
     diff.insert(0, 'Water Year', getWaterYear(diff.index))
     diff_grouped = diff.groupby(diff['Water Year']).cumsum()
-
 #    value_for_year = diff_grouped.resample('BA-SEP',how='last')  #Assumes water year ends Sep 30
     return diff_grouped
+        
+def MaxSWE_wy_snow_data(df,ffilter=15):
+    """
+    returns pandas dataframe with max 15-day (or ffilter-day) running SWE for whole water year
+    
+    return max_df -- pandas df (pandas dataframe)
+    """
+    filtered_df = df
+    filtered_df[:] = gaussian_filter1d(df,5,axis=0) #new dataframe w Gaussian-filtered data
+    filtered_df.insert(0, 'Water Year', getWaterYear(filtered_df.index))
+    filtered_grouped = filtered_df.groupby(filtered_df['Water Year']).cummax()
+
+    return filtered_grouped
         
 def normalize_by_median(df):
     """
@@ -95,7 +117,7 @@ def normalize_by_median(df):
     """
     df_norm = df.div(df.groupby(lambda x: x.dayofyear).transform(pd.Series.median))
     # this line thanks to EdChum on stackoverflow
-
+    print df_norm.loc['19920515':'19920615']
     return df_norm
 
 def basin_index(df):
@@ -147,7 +169,6 @@ def plot_fourier(df,name,filterf=None):
     """
     import matplotlib.pyplot as plt
     import scipy.fftpack
-    from scipy.ndimage import gaussian_filter1d    
     # Nans must be removed or routine generates an error
     df = df.fillna(0.)
     df = df/df.mean()
@@ -187,9 +208,16 @@ def tsplot(df,name):
 #Names: 
 #name = "Railroad Overpass (710)"
 #name = "Santiam Jct. (733)"
-#name = "Mckenzie (619)"
-#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\',retrieve="SWEflux")
-#snow_df = snow_df.loc['19801001':'20140930']#xf,yf1 = plot_fourier(snow_df['19811001':],name,filterf=10.)
+###name = "Mckenzie (619)"
+#snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
+#snow_df = MaxSWE_wy_snow_data(snow_df)
+#snow_df = gnrl.reassign_by_wyr(snow_df)
+#print snow_df.tail(16)
+#assert False
+#tsplot(snow_df['20061001':'20100930'],name)
+#assert False
+##snow_df = snow_df.loc['19801001':'20140930']
+##xf,yf1 = plot_fourier(snow_df['19811001':],name,filterf=10.)
 #snow_df = get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\',retrieve="Precip")
 #xf,yf2 = plot_fourier(snow_df['19811001':],name,filterf=10.)
 ##rtd_df = pd.DataFrame(yf1/yf2)

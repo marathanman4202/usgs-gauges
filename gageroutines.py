@@ -56,6 +56,23 @@ def get_gage_info(file_name = 'gage_locations.csv', index_col = [0,1,2,3], local
     gage_info = [[gage_info[i][index_col[j]] for j in range(numcol)] for i in range(num_gages)] # return only values asked for by index_col for all gages
     return gage_info
     
+def get_gage_info_dict(file_name = 'gage_locations.csv', index_col = [0,1,2,3], local_path = ''):
+    """
+    returns dict of gage number: gage_name, lat, long from csv file
+    file_name = csv file
+    index_col = column for gage number [0], gage name [1], lat [2], long [3] from csv file.  Set index_col list to retrieve each of these.
+    local_path = location of file
+    
+    return dict [gage number: gage_name, lat, long] or subset depending on index_col
+    """
+    gage_info = get_gage_info(file_name = file_name, index_col = index_col, local_path = local_path)
+    num_gages = len(gage_info)
+    g1 = [gage_info[i][0] for i in range(num_gages)]
+    g2 = [(gage_info[i][1],gage_info[i][2],gage_info[i][3]) for i in range(num_gages)]
+    gage_dict = dict(zip(g1,g2))
+    return gage_dict
+    
+    
 def get_all_gages(file_name = 'gage_locations.csv', index_col = [0,2,3], local_path = ''):
     """
     returns pandas dataframe of all gages. Careful. This could be huge!
