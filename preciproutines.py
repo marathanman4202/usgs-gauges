@@ -71,7 +71,7 @@ def basin_index(df):
     returns pandas dataframe with normalized basin index
     From snotel website 
         "The basin index is calculated as the sum of the valid 
-        current values divided by the sum of the corresponding medians 
+        current values divided by the sum of the corresponding medians  [use mean for precip]
         (for snow water equivalent) or averages (for precipitation) and 
         the resulting fraction multiplied by 100."
     df = pandas dataframe with daily time index
@@ -175,8 +175,9 @@ def tsplot(df):
     plt.show()    
 #Test with the following lines
 #precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-##precip_by_moyrange = get_value_by_moyrange(precip_df,7,8)
-#precip_by_wy = reassign_by_wyr(precip_df)
+#precip_by_moyrange = get_value_by_moyrange(precip_df,2,5)
+#precip_by_wy = reassign_by_wyr(precip_by_moyrange)
+#print precip_by_wy.mean()/1561.044
 #tsplot(precip_by_wy)
 #print precip_by_wy['19000101':'20141001'].mean()#/1565.6999
 #print precip_by_wy

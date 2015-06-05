@@ -46,6 +46,8 @@ if using_doy:
     snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=152)
     snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
     snow_data.append(['Jun 1 SWE',snow_basin_index])
+    
+# For Max SWE:
 else:
     snow_df = snt.MaxSWE_wy_snow_data(snow_df)
     snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=270) #273
@@ -106,8 +108,8 @@ precip_data.append(['Mar Precip',precip_basin_index])
 snow_precip_pair = pd.concat([snow_sv,precip_sv],axis=1)
 snow_precip_pair.columns = ['Cum SWE', 'Precip']
 from pandas import ExcelWriter
-writer = ExcelWriter('Cum SWE v spring Precip.xlsx')
-snow_precip_pair.to_excel(writer,'Jun 1 Cum SWE spr Pre')
+writer = ExcelWriter('Max SWE to spr Pre.xlsx')
+snow_precip_pair.to_excel(writer,'Max SWE to spr Pre')
 writer.save()
 
 if using_doy:
@@ -136,7 +138,6 @@ for i_snow in range(len_snow_sv):
 
 np.savetxt('correlation.csv',np.transpose(r_significant),delimiter=',')
 print r_significant
-
 
 
 

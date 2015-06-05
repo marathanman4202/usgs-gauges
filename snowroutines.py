@@ -95,18 +95,29 @@ def cummulative_positive_wy_snow_data(df,periods='D'):
 #    value_for_year = diff_grouped.resample('BA-SEP',how='last')  #Assumes water year ends Sep 30
     return diff_grouped
         
-def MaxSWE_wy_snow_data(df,ffilter=15):
+def MaxSWE_wy_snow_data(df,ffilter=5):
     """
-    returns pandas dataframe with max 15-day (or ffilter-day) running SWE for whole water year
+    returns pandas dataframe with max 15-day (or ffilter-day) running SWE for whole water year Note 5-day ffilter is approx equiv to 15-day running average
     
     return max_df -- pandas df (pandas dataframe)
     """
     filtered_df = df
-    filtered_df[:] = gaussian_filter1d(df,5,axis=0) #new dataframe w Gaussian-filtered data
+    filtered_df[:] = gaussian_filter1d(df,ffilter,axis=0) #new dataframe w Gaussian-filtered data
     filtered_df.insert(0, 'Water Year', getWaterYear(filtered_df.index))
     filtered_grouped = filtered_df.groupby(filtered_df['Water Year']).cummax()
 
     return filtered_grouped
+    
+def meanMaxSWE_snow_data(df,ffilter=5):
+    """
+    returns mean SWE Max from max 15-day (or ffilter-day) running SWE for whole water year
+    
+    return meanmax -- pandas df (pandas dataframe)
+    """
+    df = MaxSWE_wy_snow_data(df,ffilter=ffilter)
+    meanmax = df.mean(axis=0)
+
+    return meanmax
         
 def normalize_by_median(df):
     """
