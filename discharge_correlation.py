@@ -150,7 +150,36 @@ def fig3plot(doyloop,gage_name,snow_and_gage_list,precip_and_gage_list,
                  Q_data0,slope_data,p_value,
                  R2,frac,ymax,marker,color, title, label2, label3)
 
+def get_sbi_max(df,doy=270):
+    """
+    gets basin index for Max SWE
+    """
+    snow_df_max = snt.MaxSWE_wy_snow_data(df) #FOR MAX SWE
+    snow_basin_index_doy = snt.basin_index_doy(snow_df_max,doy=270)  # doy 270 = end of Sep
+    snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
+    
+    return snow_basin_index
+    
+def get_sbi_doy(df,doy=91):
+    """
+    gets snow basin index for day of year
+    """
+    snow_basin_index_doy = snt.basin_index_doy(df,doy=doy)
+    snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
+    
+    return snow_basin_index
 
+def get_pbi_mths(df, moy_start = 10, moy_end = 9):
+    """
+    gets precip basin index for sum over months of water year
+    """
+    precip_by_moyrange =  pp.get_value_by_moyrange(precip_df,moy_start,moy_end)
+    precip_by_wy =        pp.reassign_by_wyr(precip_by_moyrange)
+    precip_basin_index =  pp.basin_index(precip_by_wy)
+    precip_basin_index =  gg.reassign_by_yr(precip_basin_index) #place at end of year
+    
+    return precip_basin_index
+    
 
 path_gage   = 'C:\\code\usgs-gauges\\gageroutines.py'
 path_gage_data = 'C:\\code\\Willamette Basin gauge data\\'
@@ -188,8 +217,8 @@ gage_tuple = {
 "Luckiamute"        : 14190500}
 Calapooia = 14173500
 
-#example_gage_names = ['McK_Clear_Lake','McK_Vida','So_Sant_Waterloo','Luckiamute','Will_Portland']
-example_gage_names = ['Mc_Vida']
+example_gage_names = ['McK_Clear_Lake','McK_Vida','So_Sant_Waterloo','Luckiamute','Will_Salem']
+#example_gage_names = ['Will_Salem']
 significance_cutoff = 0.1
 
 test = False
@@ -202,69 +231,33 @@ gage_dict = gg.get_gage_info_dict(local_path= path_gage_data)
 gage_name = gage_dict[select_gage][0]
 
 if fig3:
-    doyloop = 190
+    doyloop = 210
     averaging_days = 14
     # snow info, data
     snow_df = snt.get_snow_data(local_path = path_snow_data)
-    snow_df = snt.MaxSWE_wy_snow_data(snow_df) #FOR MAX SWE
-    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=270)  # doy 270 = end of Sep
-    snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
-
+    snow_basin_index = get_sbi_max(snow_df, doy=270)
+    snow_basin_indexJan1 = get_sbi_doy(snow_df,doy=1)
+    snow_basin_indexFeb1 = get_sbi_doy(snow_df,doy=32)
 #    snow_df = snt.cummulative_positive_wy_snow_data(snow_df,periods='W')  # FOR CUMMULATIVE SWE.  COMMENT OUT FOR NON-CUMMULATIVE
-    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=1)
-    snow_basin_indexJan1 = gg.reassign_by_yr(snow_basin_index_doy)
-    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=32)
-    snow_basin_indexFeb1 = gg.reassign_by_yr(snow_basin_index_doy)
-    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=60)
-    snow_basin_indexMar1 = gg.reassign_by_yr(snow_basin_index_doy)
-    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=91)
-    snow_basin_indexApr1 = gg.reassign_by_yr(snow_basin_index_doy)
-    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=121)
-    snow_basin_indexMay1 = gg.reassign_by_yr(snow_basin_index_doy)
-    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=152)
-    snow_basin_indexJun1 = gg.reassign_by_yr(snow_basin_index_doy)
+    snow_basin_indexMar1 = get_sbi_doy(snow_df,doy=60)
+    snow_basin_indexApr1 = get_sbi_doy(snow_df,doy=91)
+    snow_basin_indexMay1 = get_sbi_doy(snow_df,doy=121)
+    snow_basin_indexJun1 = get_sbi_doy(snow_df,doy=152)
+    test = snow_basin_indexMar1 - snow_basin_indexJun1
 
     precip_df = pp.get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-    precip_by_moyrange = pp.get_value_by_moyrange(precip_df,3,6)
-    precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
-    precip_basin_index = pp.basin_index(precip_by_wy)
-    precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
-    precipFW_by_moyrange = pp.get_value_by_moyrange(precip_df,12,2)
-    precipFW_by_wy = pp.reassign_by_wyr(precipFW_by_moyrange)
-    precipFW_basin_index = pp.basin_index(precipFW_by_wy)
-    precipFW_basin_index = gg.reassign_by_yr(precipFW_basin_index) #place at end of year
-    precip10_by_moyrange = pp.get_value_by_moyrange(precip_df,10,10)
-    precip10_by_wy = pp.reassign_by_wyr(precip10_by_moyrange)
-    precip10_basin_index = pp.basin_index(precip10_by_wy)
-    precip10_basin_index = gg.reassign_by_yr(precip10_basin_index) #place at end of year
-    precip11_by_moyrange = pp.get_value_by_moyrange(precip_df,11,11)
-    precip11_by_wy = pp.reassign_by_wyr(precip11_by_moyrange)
-    precip11_basin_index = pp.basin_index(precip11_by_wy)
-    precip11_basin_index = gg.reassign_by_yr(precip11_basin_index) #place at end of year
-    precip12_by_moyrange = pp.get_value_by_moyrange(precip_df,12,12)
-    precip12_by_wy = pp.reassign_by_wyr(precip12_by_moyrange)
-    precip12_basin_index = pp.basin_index(precip12_by_wy)
-    precip12_basin_index = gg.reassign_by_yr(precip12_basin_index) #place at end of year
-    precip1_by_moyrange = pp.get_value_by_moyrange(precip_df,1,1)
-    precip1_by_wy = pp.reassign_by_wyr(precip1_by_moyrange)
-    precip1_basin_index = pp.basin_index(precip1_by_wy)
-    precip1_basin_index = gg.reassign_by_yr(precip1_basin_index) #place at end of year
-    precip2_by_moyrange = pp.get_value_by_moyrange(precip_df,2,2)
-    precip2_by_wy = pp.reassign_by_wyr(precip2_by_moyrange)
-    precip2_basin_index = pp.basin_index(precip2_by_wy)
-    precip2_basin_index = gg.reassign_by_yr(precip2_basin_index) #place at end of year
-    precip3_by_moyrange = pp.get_value_by_moyrange(precip_df,3,3)
-    precip3_by_wy = pp.reassign_by_wyr(precip3_by_moyrange)
-    precip3_basin_index = pp.basin_index(precip3_by_wy)
-    precip3_basin_index = gg.reassign_by_yr(precip3_basin_index) #place at end of year
-    precip4_by_moyrange = pp.get_value_by_moyrange(precip_df,4,4)
-    precip4_by_wy = pp.reassign_by_wyr(precip4_by_moyrange)
-    precip4_basin_index = pp.basin_index(precip4_by_wy)
-    precip4_basin_index = gg.reassign_by_yr(precip4_basin_index) #place at end of year
-    precip5_by_moyrange = pp.get_value_by_moyrange(precip_df,5,5)
-    precip5_by_wy = pp.reassign_by_wyr(precip5_by_moyrange)
-    precip5_basin_index = pp.basin_index(precip5_by_wy)
-    precip5_basin_index = gg.reassign_by_yr(precip5_basin_index) #place at end of year
+    precip_basin_index =   get_pbi_mths(precip_df, moy_start=3,  moy_end=6)
+    precipFW_basin_index = get_pbi_mths(precip_df, moy_start=12, moy_end=2)
+    precip10_basin_index = get_pbi_mths(precip_df, moy_start=10, moy_end=10)
+    precip11_basin_index = get_pbi_mths(precip_df, moy_start=11, moy_end=11)
+    precip12_basin_index = get_pbi_mths(precip_df, moy_start=12, moy_end=12)
+    precip1_basin_index =  get_pbi_mths(precip_df, moy_start=1,  moy_end=1)
+    precip2_basin_index =  get_pbi_mths(precip_df, moy_start=2,  moy_end=2)
+    precip3_basin_index =  get_pbi_mths(precip_df, moy_start=3,  moy_end=3)
+    precip4_basin_index =  get_pbi_mths(precip_df, moy_start=4,  moy_end=4)
+    precip5_basin_index =  get_pbi_mths(precip_df, moy_start=5,  moy_end=5)
+    precip6_basin_index =  get_pbi_mths(precip_df, moy_start=6,  moy_end=6)
+    precip7_basin_index =  get_pbi_mths(precip_df, moy_start=7,  moy_end=7)
      
     SWE_frac = []
     Q_SWE0 = []
@@ -301,12 +294,11 @@ if fig3:
         precip_and_gage = np.array(precip_and_gage_df.dropna(axis=0, how='any'))
         precip_and_gage_list.append(precip_and_gage)
         ##########################
-        from sklearn import linear_model
         from statsmodels.formula.api import ols
         all_three_df = pd.concat([snow_basin_index,precip_basin_index,precipFW_basin_index,
                                   precip10_basin_index,precip11_basin_index,precip12_basin_index,
                                   precip1_basin_index,precip2_basin_index,precip3_basin_index,
-                                  precip4_basin_index,precip5_basin_index,
+                                  precip4_basin_index,precip5_basin_index,precip6_basin_index,precip7_basin_index,
                                   snow_basin_indexJan1,snow_basin_indexFeb1,snow_basin_indexMar1,
                                   snow_basin_indexApr1,snow_basin_indexMay1,snow_basin_indexJun1,gage_df],axis=1)
         all_three_df.drop("Gage number",axis=1,inplace=True)
@@ -321,20 +313,24 @@ if fig3:
         precip3  = all_three_df[8]
         precip4  = all_three_df[9]
         precip5  = all_three_df[10]
-        SWEJan1  = all_three_df[11]
-        SWEFeb1  = all_three_df[12]
-        SWEMar1  = all_three_df[13]
-        SWEApr1  = all_three_df[14]
-        SWEMay1  = all_three_df[15]
-        SWEJun1  = all_three_df[16]
+        precip6 =  all_three_df[11]
+        precip7 = all_three_df[12]
+        SWEJan1  = all_three_df[13]
+        SWEFeb1  = all_three_df[14]
+        SWEMar1  = all_three_df[15]
+        SWEApr1  = all_three_df[16]
+        SWEMay1  = all_three_df[17]
+        SWEJun1  = all_three_df[18]
         gage = all_three_df["Discharge (cfs)"]
         all_three_df.columns = ["SWE","precipSpr","precipFW","precip10","precip11","precip12",
-                                "precip1","precip2","precip3","precip4","precip5",
+                                "precip1","precip2","precip3","precip4","precip5", "precip6", "precip7",
                                 "SWEJan1","SWEFeb1","SWEMar1","SWEApr1","SWEMay1","SWEJun1","gage"]
 #        formula = 'gage ~ precip10+precip3+precip5+SWEApr1+SWEJun1'
-        formula = 'gage ~ precip10+precipFW+precipSpr+SWE'
+        formula = 'gage ~ precipSpr+precip10+SWE'
         lm = ols(formula, all_three_df).fit()
         print lm.summary()
+    
+    for i in range(2):
         assert False
         ##############################
         # slope, intercept, r_value, p_value, std_err
