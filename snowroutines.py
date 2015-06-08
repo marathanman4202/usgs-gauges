@@ -101,7 +101,7 @@ def MaxSWE_wy_snow_data(df,ffilter=5):
     
     return max_df -- pandas df (pandas dataframe)
     """
-    filtered_df = df
+    filtered_df = df.copy()  #create copy of array to be filtered (needs to be copy, otherwise aliasing issues)
     filtered_df[:] = gaussian_filter1d(df,ffilter,axis=0) #new dataframe w Gaussian-filtered data
     filtered_df.insert(0, 'Water Year', getWaterYear(filtered_df.index))
     filtered_grouped = filtered_df.groupby(filtered_df['Water Year']).cummax()
