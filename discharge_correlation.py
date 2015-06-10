@@ -231,7 +231,7 @@ gage_dict = gg.get_gage_info_dict(local_path= path_gage_data)
 gage_name = gage_dict[select_gage][0]
 
 if fig3:
-    doyloop = 210
+    doyloop = 190
     averaging_days = 14
     # snow info, data
     snow_df = snt.get_snow_data(local_path = path_snow_data)
@@ -247,6 +247,7 @@ if fig3:
 
     precip_df = pp.get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
     precip_basin_index =   get_pbi_mths(precip_df, moy_start=3,  moy_end=6)
+    precipAnn_basin_index = get_pbi_mths(precip_df,moy_start=10, moy_end=9)
     precipFW_basin_index = get_pbi_mths(precip_df, moy_start=12, moy_end=2)
     precip10_basin_index = get_pbi_mths(precip_df, moy_start=10, moy_end=10)
     precip11_basin_index = get_pbi_mths(precip_df, moy_start=11, moy_end=11)
@@ -299,6 +300,7 @@ if fig3:
                                   precip10_basin_index,precip11_basin_index,precip12_basin_index,
                                   precip1_basin_index,precip2_basin_index,precip3_basin_index,
                                   precip4_basin_index,precip5_basin_index,precip6_basin_index,precip7_basin_index,
+                                  precipAnn_basin_index,
                                   snow_basin_indexJan1,snow_basin_indexFeb1,snow_basin_indexMar1,
                                   snow_basin_indexApr1,snow_basin_indexMay1,snow_basin_indexJun1,gage_df],axis=1)
         all_three_df.drop("Gage number",axis=1,inplace=True)
@@ -315,18 +317,20 @@ if fig3:
         precip5  = all_three_df[10]
         precip6 =  all_three_df[11]
         precip7 = all_three_df[12]
-        SWEJan1  = all_three_df[13]
-        SWEFeb1  = all_three_df[14]
-        SWEMar1  = all_three_df[15]
-        SWEApr1  = all_three_df[16]
-        SWEMay1  = all_three_df[17]
-        SWEJun1  = all_three_df[18]
+        precipAnn = all_three_df[13]
+        SWEJan1  = all_three_df[14]
+        SWEFeb1  = all_three_df[15]
+        SWEMar1  = all_three_df[16]
+        SWEApr1  = all_three_df[17]
+        SWEMay1  = all_three_df[18]
+        SWEJun1  = all_three_df[19]
         gage = all_three_df["Discharge (cfs)"]
         all_three_df.columns = ["SWE","precipSpr","precipFW","precip10","precip11","precip12",
                                 "precip1","precip2","precip3","precip4","precip5", "precip6", "precip7",
+                                "precipAnn",
                                 "SWEJan1","SWEFeb1","SWEMar1","SWEApr1","SWEMay1","SWEJun1","gage"]
 #        formula = 'gage ~ precip10+precip3+precip5+SWEApr1+SWEJun1'
-        formula = 'gage ~ precipSpr+precip10+SWE'
+        formula = 'gage ~ precipAnn+precipSpr+precip10+SWE'
         lm = ols(formula, all_three_df).fit()
         print lm.summary()
     
