@@ -330,7 +330,7 @@ if fig3:
                                 "precipAnn",
                                 "SWEJan1","SWEFeb1","SWEMar1","SWEApr1","SWEMay1","SWEJun1","gage"]
 #        formula = 'gage ~ precip10+precip3+precip5+SWEApr1+SWEJun1'
-        formula = 'gage ~ precipAnn+precipSpr+precip10+SWE'
+        formula = 'gage ~ precipSpr+SWE'
         lm = ols(formula, all_three_df).fit()
         print lm.summary()
     

@@ -22,7 +22,7 @@ pp = imp.load_source('get_value_by_moyrange','C:\\code\\usgs-gauges\\preciprouti
 pp = imp.load_source('reassign_by_wyr','C:\\code\\usgs-gauges\\preciproutines.py')
 pp = imp.load_source('basin_index','C:\\code\\usgs-gauges\\preciproutines.py')
 
-using_doy = False
+using_doy = True
 snow_data = []
 snow_df = snt.get_snow_data(local_path = 'C:\\code\\Willamette Basin snotel data\\')
 snow_df = snow_df.loc['19801001':'20140930']
@@ -47,12 +47,18 @@ if using_doy:
     snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
     snow_data.append(['Jun 1 SWE',snow_basin_index])
     
-# For Max SWE:
-else:
     snow_df = snt.MaxSWE_wy_snow_data(snow_df)
     snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=270) #273
     snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
     snow_data.append(['Max SWE',snow_basin_index])
+    
+    
+# For Max SWE:
+#else:
+#    snow_df = snt.MaxSWE_wy_snow_data(snow_df)
+#    snow_basin_index_doy = snt.basin_index_doy(snow_df,doy=270) #273
+#    snow_basin_index = gg.reassign_by_yr(snow_basin_index_doy)
+#    snow_data.append(['Max SWE',snow_basin_index])
     
 snow_sv = snow_basin_index  #### <--------------------------------------------------
 
@@ -69,11 +75,21 @@ precip_basin_index = pp.basin_index(precip_by_wy)
 precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
 precip_data.append(['Feb-May Precip',precip_basin_index])
 precip_sv = precip_basin_index  #### <--------------------------------------------------
+precip_by_moyrange = pp.get_value_by_moyrange(precip_df,2,6)
+precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
+precip_basin_index = pp.basin_index(precip_by_wy)
+precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
+precip_data.append(['Feb-Jun Precip',precip_basin_index])
 precip_by_moyrange = pp.get_value_by_moyrange(precip_df,3,5)
 precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
 precip_basin_index = pp.basin_index(precip_by_wy)
 precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
 precip_data.append(['Mar-May Precip',precip_basin_index])
+precip_by_moyrange = pp.get_value_by_moyrange(precip_df,3,6)
+precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
+precip_basin_index = pp.basin_index(precip_by_wy)
+precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
+precip_data.append(['Mar-Jun Precip',precip_basin_index])
 precip_by_moyrange = pp.get_value_by_moyrange(precip_df,1,4)
 precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
 precip_basin_index = pp.basin_index(precip_by_wy)
@@ -105,6 +121,33 @@ precip_basin_index = pp.basin_index(precip_by_wy)
 precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
 precip_data.append(['Mar Precip',precip_basin_index])
 
+precip_by_moyrange = pp.get_value_by_moyrange(precip_df,10,10)
+precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
+precip_basin_index = pp.basin_index(precip_by_wy)
+precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
+precip_data.append(['Oct Precip',precip_basin_index])
+precip_by_moyrange = pp.get_value_by_moyrange(precip_df,11,11)
+precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
+precip_basin_index = pp.basin_index(precip_by_wy)
+precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
+precip_data.append(['Nov Precip',precip_basin_index])
+precip_by_moyrange = pp.get_value_by_moyrange(precip_df,12,12)
+precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
+precip_basin_index = pp.basin_index(precip_by_wy)
+precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
+precip_data.append(['Dec Precip',precip_basin_index])
+precip_by_moyrange = pp.get_value_by_moyrange(precip_df,11,2)
+precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
+precip_basin_index = pp.basin_index(precip_by_wy)
+precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
+precip_data.append(['Winter Precip',precip_basin_index])
+
+precip_by_moyrange = pp.get_value_by_moyrange(precip_df,10,9)
+precip_by_wy = pp.reassign_by_wyr(precip_by_moyrange)
+precip_basin_index = pp.basin_index(precip_by_wy)
+precip_basin_index = gg.reassign_by_yr(precip_basin_index) #place at end of year
+precip_data.append(['Ann Precip',precip_basin_index])
+
 snow_precip_pair = pd.concat([snow_sv,precip_sv],axis=1)
 snow_precip_pair.columns = ['Cum SWE', 'Precip']
 from pandas import ExcelWriter
@@ -118,27 +161,43 @@ else:
     len_snow_sv = 1
 significance_cutoff = 0.1
 
+#regression_stats_sg = []
+#r_significant = []
+#for i_snow in range(len_snow_sv):
+#    regression_stats_sg_row = []
+#    r_significant_row = []
+#    for j_precip in range(9):  
+#        snow_and_precip_df = pd.concat([snow_data[i_snow][1],precip_data[j_precip][1]],axis=1)
+#        snow_and_precip = np.array(snow_and_precip_df.dropna(axis=0, how='any'))
+#        # slope, intercept, r_value, p_value, std_err
+#        statssv = stats.linregress(snow_and_precip[:,0],snow_and_precip[:,1])
+#        regression_stats_sg_row.append(statssv)
+#        if statssv[3]<significance_cutoff: 
+#            r_significant_row.append(statssv[2])
+#        else: 
+#            r_significant_row.append(0.)
+#    regression_stats_sg.append(regression_stats_sg_row)
+#    r_significant.append(np.square(r_significant_row))
+#
+#np.savetxt('correlation.csv',np.transpose(r_significant),delimiter=',')
+#print r_significant
+
 regression_stats_sg = []
 r_significant = []
 for i_snow in range(len_snow_sv):
     regression_stats_sg_row = []
     r_significant_row = []
-    for j_precip in range(9):  
+    for j_precip in range(len(precip_data)):  
         snow_and_precip_df = pd.concat([snow_data[i_snow][1],precip_data[j_precip][1]],axis=1)
-        snow_and_precip = np.array(snow_and_precip_df.dropna(axis=0, how='any'))
-        # slope, intercept, r_value, p_value, std_err
-        statssv = stats.linregress(snow_and_precip[:,0],snow_and_precip[:,1])
-        regression_stats_sg_row.append(statssv)
-        if statssv[3]<significance_cutoff: 
-            r_significant_row.append(statssv[2])
-        else: 
-            r_significant_row.append(0.)
-    regression_stats_sg.append(regression_stats_sg_row)
-    r_significant.append(np.square(r_significant_row))
+snowdf   = pd.concat([snow_data[i_snow][1] for i_snow in range(len(snow_data))],axis=1)
+precipdf = pd.concat([precip_data[j_precip][1] for j_precip in range(len(precip_data))],axis=1)
+snow_and_precip_df = pd.concat([snowdf,precipdf],axis=1)
+correlation_matrix = snow_and_precip_df.corr()
 
-np.savetxt('correlation.csv',np.transpose(r_significant),delimiter=',')
-print r_significant
+#np.savetxt('snow and precip.csv',np.array(snow_and_precip_df),delimiter=',')
 
+np.savetxt('correlation.csv',np.array(correlation_matrix),delimiter=',')
+#print covariance_matrix
 
 
 
