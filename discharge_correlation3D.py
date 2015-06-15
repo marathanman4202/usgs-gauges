@@ -219,7 +219,7 @@ gage_tuple = {
 Calapooia = 14173500
 
 #example_gage_names = ['McK_Clear_Lake','McK_Vida','So_Sant_Waterloo','Luckiamute','Will_Salem']
-example_gage_names = ['MFW_Hills_Cr']
+example_gage_names = ['Will_Salem']
 significance_cutoff = 0.1
 
 test = False
@@ -334,15 +334,10 @@ if fig3:
                             
         if len(all_three_df.dropna(axis=0)) > 5:
             formula = 'gage ~ precipSpr+SWE'
-            print all_three_df.dropna(axis=0)
-            assert False
+            lm = ols(formula, all_three_df).fit()
         else:
             print 'not enough data'
-        lm = ols(formula, all_three_df).fit()
-        print lm.summary()
     
-    for i in range(2):
-        assert False
         ##############################
         # slope, intercept, r_value, p_value, std_err
         regression_stats_sg = stats.linregress(snow_and_gage[:,0],snow_and_gage[:,2]) 
