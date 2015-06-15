@@ -337,15 +337,26 @@ if fig3:
         threedee.set_xlabel('$Spring\, Precipitation$ [frac of ann avg]', fontsize = 14)
         threedee.set_ylabel('$Max\, SWE$ [frac of median]', fontsize = 14)
         threedee.set_zlabel('$Discharge\, at\, Gage$ [cfs]', fontsize = 14)
+        threedee.set_xlim(left=0.,right=2.)
+        threedee.set_ylim(bottom=0.,top=2.)
+        threedee.set_zlim(bottom=0.)
         plt.title(gage_dict[select_gage][0],fontsize=14)
-        plt.show()    
-        assert False
+        plt.gca().patch.set_facecolor('white')
+        threedee.w_xaxis.set_pane_color((0.8, 0.8, 0.8, 1.0))
+        threedee.w_yaxis.set_pane_color((0.8, 0.8, 0.8, 1.0))
+        threedee.w_zaxis.set_pane_color((0.8, 0.8, 0.8, 1.0))
                       
         if len(all_three_df.dropna(axis=0)) > 5:
             formula = 'gage ~ precipSpr+SWE'
             lm = ols(formula, all_three_df).fit()
         else:
             print 'not enough data at ' + gage
+        xx, yy = np.meshgrid(np.arange(0.,2.,0.2), np.arange(0.,2.,0.2))
+        zz = (lm.params[1] * xx + lm.params[2] * yy + lm.params[0]) 
+        print lm.params[0],lm.params[1],lm.params[2]
+        threedee.plot_surface(xx,yy,zz,alpha=0.3)
+        plt.show()
+        assert False
     
         ##############################
         # slope, intercept, r_value, p_value, std_err
