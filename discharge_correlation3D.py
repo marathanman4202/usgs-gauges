@@ -14,6 +14,7 @@ from scipy import stats
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.gridspec as gridspec
+from mpl_toolkits.mplot3d import Axes3D
 
 def royplot(xf,yf,xf2,yf2,xf_precip,yf_precip,gage_name,select_gage,R2_SWE,R2_PRE):
     fig = plt.figure()
@@ -219,7 +220,7 @@ gage_tuple = {
 Calapooia = 14173500
 
 #example_gage_names = ['McK_Clear_Lake','McK_Vida','So_Sant_Waterloo','Luckiamute','Will_Salem']
-example_gage_names = ['Will_Salem']
+example_gage_names = ['Will_Portland']
 significance_cutoff = 0.1
 
 test = False
@@ -331,12 +332,20 @@ if fig3:
                                 "precipAnn",
                                 "SWEJan1","SWEFeb1","SWEMar1","SWEApr1","SWEMay1","SWEJun1","gage"]
 #        formula = 'gage ~ precip10+precip3+precip5+SWEApr1+SWEJun1'
-                            
+        threedee = plt.figure().gca(projection='3d')
+        threedee.scatter(all_three_df['precipSpr'], all_three_df['SWE'], all_three_df['gage'])
+        threedee.set_xlabel('$Spring\, Precipitation$ [frac of ann avg]', fontsize = 14)
+        threedee.set_ylabel('$Max\, SWE$ [frac of median]', fontsize = 14)
+        threedee.set_zlabel('$Discharge\, at\, Gage$ [cfs]', fontsize = 14)
+        plt.title(gage_dict[select_gage][0],fontsize=14)
+        plt.show()    
+        assert False
+                      
         if len(all_three_df.dropna(axis=0)) > 5:
             formula = 'gage ~ precipSpr+SWE'
             lm = ols(formula, all_three_df).fit()
         else:
-            print 'not enough data'
+            print 'not enough data at ' + gage
     
         ##############################
         # slope, intercept, r_value, p_value, std_err
