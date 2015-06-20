@@ -44,10 +44,10 @@ def get_gage_info(file_name = 'gage_locations.csv', index_col = [0,1,2,3], local
     """
     returns list of list of [gage number, lat, long] from csv file
     file_name = csv file
-    index_col = column for gage number [0], gage name [1], lat [2], long [3] from csv file.  Set index_col list to retrieve each of these.
+    index_col = column for gage number [0], gage name [1], lat [2], long [3], drainage area [4] from csv file.  Set index_col list to retrieve each of these.
     local_path = location of file
     
-    return list [gage number, gage_name, lat, long] or subset depending on index_col
+    return list [gage number, gage_name, lat, long, drainage area] or subset depending on index_col
     """
     gage_info_np = np.array(np.genfromtxt(local_path + file_name, delimiter=',',skip_header=0,dtype=None))
     gage_info = gage_info_np.tolist()
@@ -60,10 +60,10 @@ def get_gage_info_dict(file_name = 'gage_locations.csv', index_col = [0,1,2,3], 
     """
     returns dict of gage number: gage_name, lat, long from csv file
     file_name = csv file
-    index_col = column for gage number [0], gage name [1], lat [2], long [3] from csv file.  Set index_col list to retrieve each of these.
+    index_col = column for gage number [0], gage name [1], lat [2], long [3], drainage area [4]  from csv file.  Set index_col list to retrieve each of these.
     local_path = location of file
     
-    return dict [gage number: gage_name, lat, long] or subset depending on index_col
+    return dict [gage number: gage_name, lat, long, drainage area] or subset depending on index_col
     """
     gage_info = get_gage_info(file_name = file_name, index_col = index_col, local_path = local_path)
     num_gages = len(gage_info)
