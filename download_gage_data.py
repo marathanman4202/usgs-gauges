@@ -12,6 +12,8 @@ import csv
 import numpy as np
 sys.path.append('c:\\code\\nwispy\\')
 from nwispy import nwispy_webservice
+import re
+
 #print user_parameters_url
 #assert False
 pathy = 'C:\\code\\Willamette Basin gauge data\\'
@@ -55,10 +57,11 @@ for gage in Gauge_num:
             dd.append(mem)
     row = dd[2:][0]
     row.extend(da_value)
+    if ',' in row[1]: row[1] = re.sub(',', '', row[1])
     b.append(row)
     print row
 
-with open(pathy+"gage_locations.csv", "wb") as f:
+with open(pathy+"gage_locations2.csv", "wb") as f:
     writer = csv.writer(f)
     writer.writerows(b)
     
