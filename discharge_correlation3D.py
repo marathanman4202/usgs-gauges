@@ -349,6 +349,7 @@ if fig3:
         if len(all_three_df.dropna(axis=0)) > 5:
             formula = 'gage ~ precipSpr+SWE'
             lm = ols(formula, all_three_df).fit()
+            print lm.summary()
         else:
             print 'not enough data at ' + gage
         xx, yy = np.meshgrid(np.arange(0.,2.,0.2), np.arange(0.,2.,0.2))

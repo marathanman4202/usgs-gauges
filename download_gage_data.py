@@ -17,8 +17,8 @@ from nwispy import nwispy_webservice
 pathy = 'C:\\code\\Willamette Basin gauge data\\'
 #pathy = 'C:\\code\\'
 Q_SWE_PRE_params = xlrd.open_workbook('C:\\code\\Willamette Basin gauge data\\Q-SWE-PRE_temp.xlsx')
-#Gauge_num = Q_SWE_PRE_params.sheet_by_index(2).col_values(0)[1:]  # for whole list of gages
-Gauge_num = [14200100]  # for specific gage
+Gauge_num = Q_SWE_PRE_params.sheet_by_index(2).col_values(0)[1:]  # for whole list of gages
+#Gauge_num = [14164900]  # for specific gage
 # TRY gage 14200100
 b = []
 for gage in Gauge_num:
@@ -30,6 +30,18 @@ for gage in Gauge_num:
     nwispy_webservice.download_file(user_parameters_url,'dv',filey,pathy)
     response = urllib2.urlopen('http://waterservices.usgs.gov/nwis/site/?format=rdb&sites=' + gage_num_str)  
     outputfile = os.path.join(pathy, gage_num_str+'_loc.txt')        
+
+    #HTML extract code to pull drainage area from the frickin' websites
+    from lxml import html
+    import requests
+    urlstring = "http://nwis.waterdata.usgs.gov/nwis/inventory?search_site_no="+\
+        gage_num_str+\
+        "&search_site_no_match_type=exact&site_tp_cd=ST&drain_area_va_conjunction=and&group_key=county_cd&format=sitefile_output&sitefile_output_format=xml&column_name=agency_cd&column_name=site_no&column_name=station_nm&column_name=site_tp_cd&column_name=huc_cd&column_name=drain_area_va&list_of_search_criteria=search_site_no%2Csite_tp_cd%2Cdrain_area_va"
+    page = requests.get(urlstring)
+    tree = html.fromstring(page.content)
+    da_value = tree.xpath('//drain_area_va/text()')
+    if len(da_value)==0: da_value.append(np.NaN)  # in case drainage area isn't given, fill with NaN
+
     with open(outputfile, "wb") as f:
         f.write(response.read())        
     with open(pathy+gage_num_str+'_loc.txt') as f:
@@ -41,30 +53,14 @@ for gage in Gauge_num:
             mem = line[1:3]
             mem.extend(line[4:6])
             dd.append(mem)
-    b.append(dd[2:][0])
-    print dd[2:][0]
-
-    #XML extract code to pull drainage area
-    from lxml import html
-    import requests
-    page = requests.get("http://nwis.waterdata.usgs.gov/nwis/inventory?search_site_no="+
-    gage_num_str+
-    "&search_site_no_match_type=exact&site_tp_cd=ST&drain_area_va_conjunction=and&group_key=county_cd&format=sitefile_output&sitefile_output_format=xml&column_name=agency_cd&column_name=site_no&column_name=station_nm&column_name=site_tp_cd&column_name=huc_cd&column_name=drain_area_va&list_of_search_criteria=search_site_no%2Csite_tp_cd%2Cdrain_area_va")
-#    print page.text
-#    assert False
-#    print "http://nwis.waterdata.usgs.gov/nwis/inventory?search_site_no="+   gage_num_str+\
-#    "&search_site_no_match_type=exact&site_tp_cd=ST&drain_area_va_conjunction=and&group_key=county_cd&format=sitefile_output&sitefile_output_format=xml&column_name=agency_cd&column_name=site_no&column_name=station_nm&column_name=site_tp_cd&column_name=huc_cd&column_name=drain_area_va&list_of_search_criteria=search_site_no%2Csite_tp_cd%2Cdrain_area_va"
-#    assert False
-    tree = html.fromstring(page.content)
-    da = (tree.text_content()[-9:-3])
-    print da, 'here'
-    assert False
-    drain_area = tree.label
+    row = dd[2:][0]
+    row.extend(da_value)
+    b.append(row)
+    print row
 
 with open(pathy+"gage_locations.csv", "wb") as f:
     writer = csv.writer(f)
     writer.writerows(b)
-assert False   
     
     
     
@@ -82,7 +78,7 @@ a = np.array(dd[2:])
 
 outputfile = os.path.join(pathy, filey[:-4]+'_loc.txt')        
 with open(outputfile, "wb") as f:
-    f.write(response.read())        
+    f.write(response.read())    
     
 with open(pathy+filey[:-4]+'_loc.txt') as f:
     reader = csv.reader(f, delimiter="\t")
