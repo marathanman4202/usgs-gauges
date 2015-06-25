@@ -7,13 +7,14 @@ import sys
 sys.path.insert(0, 'C:\\code\\maplot\\')
 import constants as cst
 
-def get_precip_data(index_col = 0, local_path = ''):
+def get_precip_data(index_col = 0, local_path = '',filename=None):
     """
     returns pandas dataframe with all precip data from csv file
     
     local_path -- path location for data (str) default = ''
     index_col -- column for dates (int) default = 0
     return precip_df -- pandas df (pandas dataframe)
+    filename -- get specific csv file data if filename is given, otherwise get whatever is there
     
     requires precip data saved to csv files at location local_path
     """
@@ -21,7 +22,11 @@ def get_precip_data(index_col = 0, local_path = ''):
     i = -1
     df_list = []
     print 'getting precip data, stored locally'
-    for filename in os.listdir(local_path):
+    if filename is None:
+        filelist = os.listdir(local_path)
+    else:
+        filelist = [filename]
+    for filename in filelist:
         if filename[-4:]=='.csv':
             i += 1
             skiprows = -1
@@ -172,12 +177,66 @@ def tsplot(df):
 #    axes.set_xlim(['20150101','20150430'])
     #axes.set_ylim([0,10])
     df.plot()
-    plt.show()    
+    plt.show()   
+    
+def scatterplot(df,xdata,ydata,xlabel=None,ylabel=None,title=None):
+    """
+    simple plotting routine for two timeseries.  Just quick & dirty.
+    """
+    import matplotlib.pyplot as plt
+    twodee = plt.figure().gca()
+    twodee.scatter(df[xdata], df[ydata])
+    twodee.set_xlabel(xlabel, fontsize = 14)
+    twodee.set_ylabel(ylabel, fontsize = 14)
+    twodee.set_xlim(left=0.)
+    twodee.set_ylim(bottom=0.)
+    plt.title(title,fontsize=24)
+    plt.gca().patch.set_facecolor('white')
+    plt.show()
+    
+def dostats(df):
+    from statsmodels.formula.api import ols
+    formula = 'Basin ~ SalemMcNF'
+    lm = ols(formula, df).fit()
+    print lm.summary()
+    return
+    
 #Test with the following lines
-#precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
-#precip_by_moyrange = get_value_by_moyrange(precip_df,2,5)
-#precip_by_wy = reassign_by_wyr(precip_by_moyrange)
-#print precip_by_wy.mean()/1561.044
+precip_df = get_precip_data(local_path = 'C:\\code\\Willamette Basin precip data\\')
+precip_McNF_df = get_precip_data(
+    local_path = 'C:\\Users\\haggertr\\Desktop\\Roy\\Research\\WW2100\\Research\snow\\',
+    filename='McNary Field precip.csv'
+    )
+precip_by_moyrange_McNF = get_value_by_moyrange(precip_McNF_df,10,6)
+precip_by_wy_McNF = reassign_by_wyr(precip_by_moyrange_McNF)
+print precip_by_wy_McNF.mean()
+assert False
+
+precip_both_df = pd.concat([precip_df,precip_McNF_df],axis=1)
+precip_both_df.columns = ["Basin","SalemMcNF"]
+dostats(precip_both_df)
+
+#scatterplot(
+#    precip_both_df,'Basin','SalemMcNF',
+#    xlabel = '$Basinwide\, Monthly\, Precipitation$ [mm]',
+#    ylabel = '$Salem\, McNary\, Field\, Monthly\, Precipitation$ [mm]',
+#    title = 'Salem Precip vs Basinwide Precip')
+
+precip_by_moyrange = get_value_by_moyrange(precip_df,2,6)
+precip_by_moyrange_McNF = get_value_by_moyrange(precip_McNF_df,2,6)
+precip_by_wy = reassign_by_wyr(precip_by_moyrange)
+precip_by_wy_McNF = reassign_by_wyr(precip_by_moyrange_McNF)
+print precip_by_wy.mean()
+print precip_by_wy_McNF.mean()
+spr_Precip_both_df = pd.concat([precip_by_wy,precip_by_wy_McNF],axis=1)
+spr_Precip_both_df.columns = ["Basin","SalemMcNF"]
+dostats(spr_Precip_both_df)
+scatterplot(
+    spr_Precip_both_df,'Basin','SalemMcNF',
+    xlabel = '$Basinwide\, MAMJ\, Precipitation$ [mm]',
+    ylabel = '$Salem\, McNary\, Field\, MAMJ\, Precipitation$ [mm]',
+    title = 'Salem Precip vs Basinwide Precip')
+
 #tsplot(precip_by_wy)
 #print precip_by_wy['19000101':'20141001'].mean()#/1565.6999
 #print precip_by_wy
